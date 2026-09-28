@@ -1,0 +1,43 @@
+{
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.ITAdmin",
+      "description": "ITAdmin"
+    },
+    {
+      "name": "$XSAPPNAME.ComplianceManager",
+      "description": "ComplianceManager"
+    },
+    {
+      "name": "$XSAPPNAME.Employee",
+      "description": "Employee"
+    }
+  ],
+  "attributes": [],
+  "role-templates": [
+    {
+      "name": "ITAdmin",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.ITAdmin"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "ComplianceManager",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.ComplianceManager"
+      ],
+      "attribute-references": []
+    },
+    {
+      "name": "Employee",
+      "description": "generated",
+      "scope-references": [
+        "$XSAPPNAME.Employee"
+      ],
+      "attribute-references": []
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "name": "sap-btp-it-asset-lifecycle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "SAP CAP and SAPUI5 IT Asset Lifecycle Management capstone",
+  "license": "UNLICENSED",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "db:deploy": "cds deploy",
+    "start": "cds-serve",
+    "watch": "cds watch",
+    "compile": "cds compile db/schema.cds srv/asset-management-service.cds --to json",
+    "build": "cds build --production",
+    "copy:ui": "node scripts/copy-ui.js",
+    "test": "mocha --timeout 30000 \"test/**/*.test.js\""
+  },
+  "dependencies": {
+    "@cap-js/hana": "^3",
+    "@sap/cds": "^10.1.1",
+    "@sap/xssec": "^4"
+  },
+  "devDependencies": {
+    "@cap-js/cds-test": "^1.0.2",
+    "@cap-js/sqlite": "^3.1.1",
+    "@sap/cds-dk": "^10.1.0",
+    "mocha": "^12.0.2"
+  },
+  "cds": {
+    "requires": {
+      "db": {
+        "kind": "sqlite",
+        "credentials": {
+          "url": "db.sqlite"
+        },
+        "[production]": {
+          "kind": "hana"
+        }
+      },
+      "auth": {
+        "[development]": {
+          "kind": "mocked",
+          "users": {
+            "it.admin": {
+              "password": "demo-admin",
+              "roles": [
+                "ITAdmin"
+              ]
+            },
+            "employee.alex": {
+              "password": "demo-employee",
+              "roles": [
+                "Employee"
+              ]
+            },
+            "employee.jamie": {
+              "password": "demo-employee",
+              "roles": [
+                "Employee"
+              ]
+            },
+            "compliance.manager": {
+              "password": "demo-compliance",
+              "roles": [
+                "ComplianceManager"
+              ]
+            }
+          }
+        },
+        "[test]": {
+          "kind": "mocked",
+          "users": {
+            "it.admin": {
+              "password": "demo-admin",
+              "roles": [
+                "ITAdmin"
+              ]
+            },
+            "employee.alex": {
+              "password": "demo-employee",
+              "roles": [
+                "Employee"
+              ]
+            },
+            "employee.jamie": {
+              "password": "demo-employee",
+              "roles": [
+                "Employee"
+              ]
+            },
+            "compliance.manager": {
+              "password": "demo-compliance",
+              "roles": [
+                "ComplianceManager"
+              ]
+            }
+          }
+        },
+        "[production]": {
+          "kind": "xsuaa"
+        }
+      },
+      "[production]": {
+        "auth": {
+          "kind": "xsuaa"
+        }
+      }
+    },
+    "sql": {
+      "native_hana_associations": false
+    }
+  }
+}

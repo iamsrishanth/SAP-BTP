@@ -1,0 +1,10 @@
+[info] 2026-09-28 16:16:50 Device API logging initialized - DEVICE
+[error] 2026-09-28 16:16:51.250100 failed to load JavaScript resource: it/asset/lifecycle/Component-preload.js -  sap.ui.ModuleSystem
+[error] 2026-09-28 16:16:51.577699 (dependency of 'it/asset/lifecycle/controller/App.controller.js') Importing the pseudo module 'sap/ui/core/ValueState' is deprecated. To access the type 'sap.ui.core.ValueState', please import 'sap/ui/core/library'. You can then reference this type via the library's module export. For more information, see documentation under 'Best Practices for Loading Modules'. -  sap.ui.ModuleSystem
+[assert] "Element sap.m.Button#__button0" is not valid for aggregation "additionalContent" of Element sap.f.ShellBar#__bar0
+[assert] "Element sap.m.Button#__button1" is not valid for aggregation "additionalContent" of Element sap.f.ShellBar#__bar0
+[error] 2026-09-28 16:16:51.768800 [FUTURE FATAL] Value 'min(30rem, calc(100vw - 2rem))' is not valid for type 'sap.ui.core.CSSSize'. -  
+[error] 2026-09-28 16:16:51.783800 Component.create() failed - Error: "min(30rem, calc(100vw - 2rem))" is of type string, expected sap.ui.core.CSSSize for property "width" of Element sap.m.Panel#__panel0 sap.ui.core.Component 
+ {stack: "Error: "min(30rem, calc(100vw - 2rem))" is of type…://ui5.sap.com/resources/sap-ui-core.js:434:4578)", message: ""min(30rem, calc(100vw - 2rem))" is of type string… property "width" of Element sap.m.Panel#__panel0"}
+[error] 2026-09-28 16:16:51.784399 [FUTURE FATAL] Failed to load component for container assetLifecycle - Error: "min(30rem, calc(100vw - 2rem))" is of type string, expected sap.ui.core.CSSSize for property "width" of Element sap.m.Panel#__panel0  
+ {stack: "Error: "min(30rem, calc(100vw - 2rem))" is of type…://ui5.sap.com/resources/sap-ui-core.js:434:4578)", message: ""min(30rem, calc(100vw - 2rem))" is of type string… property "width" of Element sap.m.Panel#__panel0"}

@@ -1,0 +1,6 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 db:deploy
+> cds deploy
+
+/> successfully deployed to db.sqlite 
+

@@ -1,0 +1,21 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 test
+> mocha --timeout 30000 "test/**/*.test.js"
+
+
+
+  Asset Management CAP service
+    √ reports authenticated principal IDs and restricts each role at the API boundary (171ms)
+    √ enforces employee identity server-side even when a client submits a broader filter
+    √ registers, reads, edits, and safely deletes only an unassigned asset without history
+    √ rejects invalid registration fields, types, dates, and missing software expiry
+    √ allocates atomically, records the trusted employee, returns once, and preserves history (39ms)
+    √ allows only one of two concurrent allocation requests to commit
+    √ renews only software, updates compliance immediately, and leaves allocation status separate (38ms)
+    √ distinguishes expired, expiring, warranty, missing-date, and idle boundary cases
+    √ blocks retirement of allocated assets, preserves history, and forbids allocation after retirement
+    √ applies controlled maintenance transitions and denies generic history manipulation
+
+
+  10 passing (1s)
+

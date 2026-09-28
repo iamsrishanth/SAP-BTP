@@ -1,0 +1,17 @@
+node_modules/
+.deploy/app-router/node_modules/
+.deploy/app-router/default-env.json
+db.sqlite
+db.sqlite-journal
+db.sqlite-shm
+db.sqlite-wal
+gen/
+mta_archives/
+*.mtar
+.env
+.env.*
+!.env.example
+.DS_Store
+Thumbs.db
+playwright-report/
+test-results/

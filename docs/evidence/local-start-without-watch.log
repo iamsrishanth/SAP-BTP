@@ -1,0 +1,72 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 start
+> cds-serve
+
+[cds] - loaded model from 3 file(s):
+ 
+  srv\asset-management-service.cds
+  db\schema.cds
+  node_modules\@sap\cds\common.cds
+
+[cds] - connect to db > sqlite { url: 'db.sqlite' }
+[cds] - using auth strategy {
+  kind: 'mocked',
+  impl: 'node_modules\\@sap\\cds\\lib\\srv\\middlewares\\auth\\basic-auth.js'
+}
+[cds] - serving AssetManagementService {
+  at: [ '/asset-management' ],
+  decl: 'srv\\asset-management-service.cds:5',
+  impl: 'srv\\asset-management-service.js'
+}
+[cds] - server listening on { url: 'http://localhost:4004' }
+[cds] - server v10.1.1 launched in 810 ms
+[asset-seed] - Development demo-data seeding failed. Error: no such table: it_asset_lifecycle_Asset in:
+SELECT json_insert('{}','$."assetID"',assetID) as _json_ FROM (SELECT "$A".assetID FROM it_asset_lifecycle_Asset as "$A" LIMIT ?)
+    at NodeSqlite.prepare (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\sqlite\lib\node-sqlite.js:5:24)
+    at SQLiteService.prepare (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\sqlite\lib\SQLiteService.js:82:29)
+    at SQLiteService.onSELECT (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\db-service\lib\SQLService.js:149:25)
+    at next (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:57:38)
+    at SQLiteService.handle (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:60:8)
+    at SQLiteService.dispatch (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:32:17)
+    at SQLiteService._begin [as dispatch] (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-tx.js:198:15)
+    at async C:\Code\SAP\SAP-BTP\db\seed.js:121:27
+    at async cds.<anonymous> (C:\Code\SAP\SAP-BTP\db\seed.js:139:22) {
+  code: 'ERR_SQLITE_ERROR',
+  errcode: 1,
+  errstr: 'SQL logic error',
+  query: `SELECT json_insert('{}','$."assetID"',assetID) as _json_ FROM (SELECT "$A".assetID FROM it_asset_lifecycle_Asset as "$A" LIMIT ?)`
+}
+[queue] - Failed to fetch targets for flush Error: no such table: cds_outbox_Messages in:
+SELECT json_insert('{}','$."target"',target) as _json_ FROM (SELECT "$M".target FROM cds_outbox_Messages as "$M" GROUP BY "$M".target)
+    at NodeSqlite.prepare (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\sqlite\lib\node-sqlite.js:5:24)
+    at SQLiteService.prepare (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\sqlite\lib\SQLiteService.js:82:29)
+    at SQLiteService.onSELECT (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\db-service\lib\SQLService.js:149:25)
+    at next (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:57:38)
+    at SQLiteService.handle (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:60:8)
+    at SQLiteService.dispatch (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:32:17)
+    at SQLiteService._begin (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-tx.js:198:15)
+    at async C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\queue\processing.js:659:16
+    at async cds.cdsFlush [as flush] (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\queue\processing.js:657:14)
+    at async _flush (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\queue\SchedulingService.js:89:11) {
+  code: 'ERR_SQLITE_ERROR',
+  errcode: 1,
+  errstr: 'SQL logic error',
+  query: `SELECT json_insert('{}','$."target"',target) as _json_ FROM (SELECT "$M".target FROM cds_outbox_Messages as "$M" GROUP BY "$M".target)`
+}
+[cds] - ❗️Uncaught Error: no such table: it_asset_lifecycle_Asset in:
+SELECT json_insert('{}','$."assetID"',assetID) as _json_ FROM (SELECT "$A".assetID FROM it_asset_lifecycle_Asset as "$A" LIMIT ?)
+    at NodeSqlite.prepare (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\sqlite\lib\node-sqlite.js:5:24)
+    at SQLiteService.prepare (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\sqlite\lib\SQLiteService.js:82:29)
+    at SQLiteService.onSELECT (C:\Code\SAP\SAP-BTP\node_modules\@cap-js\db-service\lib\SQLService.js:149:25)
+    at next (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:57:38)
+    at SQLiteService.handle (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:60:8)
+    at SQLiteService.dispatch (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:32:17)
+    at SQLiteService._begin [as dispatch] (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-tx.js:198:15)
+    at async C:\Code\SAP\SAP-BTP\db\seed.js:121:27
+    at async cds.<anonymous> (C:\Code\SAP\SAP-BTP\db\seed.js:139:22) {
+  code: 'ERR_SQLITE_ERROR',
+  errcode: 1,
+  errstr: 'SQL logic error',
+  query: `SELECT json_insert('{}','$."assetID"',assetID) as _json_ FROM (SELECT "$A".assetID FROM it_asset_lifecycle_Asset as "$A" LIMIT ?)`
+}
+[cds] - ❗️server shutdown ...❗️

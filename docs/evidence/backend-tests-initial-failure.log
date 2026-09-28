@@ -1,0 +1,9 @@
+
+  TypeError: this.timeout is not a function
+      at SuiteContext.<anonymous> [90m(C:\Code\SAP\SAP-BTP\[39mtest\asset-lifecycle.test.js:83:8[90m)[39m
+      at Object.<anonymous> [90m(C:\Code\SAP\SAP-BTP\[39mtest\asset-lifecycle.test.js:82:1[90m)[39m
+
+
+ 1 failed 
+[38;5;244m 1.305s 
+

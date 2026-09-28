@@ -1,0 +1,58 @@
+{
+  "_version": "1.58.0",
+  "sap.app": {
+    "id": "it.asset.lifecycle",
+    "type": "application",
+    "title": "IT Asset Lifecycle Management",
+    "description": "Role-based asset inventory, allocation, and compliance monitoring.",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "dataSources": {
+      "assetManagement": {
+        "uri": "/odata/v4/asset-management/",
+        "type": "OData",
+        "settings": {
+          "odataVersion": "4.0"
+        }
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "rootView": {
+      "viewName": "it.asset.lifecycle.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.m": {},
+        "sap.f": {},
+        "sap.ui.core": {},
+        "sap.ui.layout": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {},
+    "resources": {
+      "css": [
+        {
+          "uri": "css/style.css"
+        }
+      ]
+    }
+  }
+}

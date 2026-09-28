@@ -1,0 +1,249 @@
+<mvc:View
+  controllerName="it.asset.lifecycle.controller.App"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:f="sap.f"
+  xmlns:layout="sap.ui.layout"
+  displayBlock="true"
+  height="100%">
+  <App id="appRoot">
+    <Page id="mainPage" enableScrolling="false" class="assetPage">
+      <landmarkInfo>
+        <PageAccessibleLandmarkInfo rootRole="None" headerRole="None" contentRole="Main" contentLabel="IT asset lifecycle workspace" />
+      </landmarkInfo>
+      <customHeader>
+        <f:ShellBar title="IT Asset Lifecycle" secondTitle="Technology Operations" class="assetShellBar" />
+      </customHeader>
+      <content>
+        <VBox height="100%" class="appFrame">
+          <HBox class="identityBar" alignItems="Center" justifyContent="SpaceBetween" visible="{page>/connected}">
+            <HBox alignItems="Center" class="identitySummary">
+              <core:Icon src="sap-icon://person-placeholder" size="1rem" decorative="false" alt="Signed-in user" />
+              <Text text="{page>/userId}" class="identityText" />
+              <ObjectStatus text="{page>/roleLabel}" state="Information" />
+            </HBox>
+            <HBox alignItems="Center" class="identityActions">
+              <Text text="Business date: {page>/businessToday} · {page>/timeZone}" class="businessDate" />
+              <Button icon="sap-icon://refresh" tooltip="Refresh current view" type="Transparent" press=".onRefresh" />
+              <Button text="Sign out" icon="sap-icon://log" type="Transparent" press=".onSignOut" />
+            </HBox>
+          </HBox>
+
+          <IconTabBar id="sectionTabs" class="sectionTabs" expandable="false" selectedKey="inventory" select=".onSectionChange" visible="{page>/connected}">
+            <items>
+              <IconTabFilter key="inventory" text="Inventory" icon="sap-icon://laptop" visible="{page>/canAdmin}" />
+              <IconTabFilter key="myAssets" text="My Assets" icon="sap-icon://employee" visible="{page>/isEmployee}" />
+              <IconTabFilter key="compliance" text="Compliance" icon="sap-icon://shield" visible="{page>/canCompliance}" />
+            </items>
+          </IconTabBar>
+
+          <MessageStrip
+            id="feedbackStrip"
+            text="{page>/feedbackText}"
+            type="{page>/feedbackType}"
+            showIcon="true"
+            showCloseButton="true"
+            close=".onCloseFeedback"
+            visible="{page>/feedbackVisible}"
+            class="feedbackStrip" />
+
+          <MessageStrip text="{page>/busyText}" type="Information" showIcon="true" visible="{page>/busy}" class="loadingRow" />
+
+          <VBox id="loginPanel" class="loginHost" alignItems="Center" justifyContent="Center" visible="{page>/loginVisible}">
+            <Panel class="loginCard" width="30rem">
+              <headerToolbar>
+                <Toolbar>
+                  <Title text="Connect to Asset Management" level="H2" />
+                </Toolbar>
+              </headerToolbar>
+              <content>
+                <VBox class="loginContent">
+                  <Text text="Sign in with your authorized CAP identity. Your password stays in memory for this tab and is cleared when you sign out or close the page." wrapping="true" />
+                  <MessageStrip text="{page>/loginError}" type="Error" showIcon="true" visible="{page>/loginErrorVisible}" />
+                  <Label text="Local mock user name" labelFor="loginUsername" required="true" />
+                  <Input id="loginUsername" value="{login>/username}" placeholder="Enter the configured local user" submit=".onConnect" />
+                  <Label text="Local mock password" labelFor="loginPassword" required="true" />
+                  <Input id="loginPassword" value="{login>/password}" type="Password" placeholder="Enter the configured local password" submit=".onConnect" />
+                  <Text text="For Cloud Foundry, use the authenticated SAP BTP session and leave both fields empty." wrapping="true" class="loginHint" />
+                  <Button text="Connect" icon="sap-icon://connected" type="Emphasized" press=".onConnect" enabled="{= !${page>/busy} }" />
+                </VBox>
+              </content>
+            </Panel>
+          </VBox>
+
+          <VBox id="workArea" class="workArea" visible="{page>/connected}" busy="{page>/busy}" busyIndicatorDelay="150" busyIndicatorSize="Medium">
+            <HBox id="inventoryWorkspace" class="workspace" fitContainer="true" visible="{page>/listVisible}">
+              <VBox id="masterPanel" class="masterPanel" width="39%">
+                <Toolbar class="panelToolbar">
+                  <Title text="{page>/listTitle}" level="H2" />
+                  <ToolbarSpacer />
+                  <Button text="Register asset" icon="sap-icon://add" type="Emphasized" press=".onRegisterAsset" visible="{page>/canAdmin}" />
+                </Toolbar>
+                <SearchField
+                  id="assetSearch"
+                  value="{page>/query}"
+                  width="100%"
+                  placeholder="Search asset name, type or full ID"
+                  search=".onSearch"
+                  liveChange=".onLiveSearch"
+                  showSearchButton="true" />
+                <HBox class="filterRow" alignItems="Center" wrap="Wrap">
+                  <Label id="typeFilterLabel" text="Type" labelFor="typeFilter" />
+                  <Select id="typeFilter" selectedKey="{page>/filterType}" change=".onFilterChange" width="8rem" ariaLabelledBy="typeFilterLabel">
+                    <items>
+                      <core:Item key="" text="All types" />
+                      <core:Item key="Hardware" text="Hardware" />
+                      <core:Item key="Software" text="Software" />
+                    </items>
+                  </Select>
+                  <Label id="statusFilterLabel" text="Lifecycle status" labelFor="statusFilter" />
+                  <Select id="statusFilter" selectedKey="{page>/filterStatus}" change=".onFilterChange" width="10rem" ariaLabelledBy="statusFilterLabel">
+                    <items>
+                      <core:Item key="" text="All statuses" />
+                      <core:Item key="Available" text="Available" />
+                      <core:Item key="Allocated" text="Allocated" />
+                      <core:Item key="In Maintenance" text="In Maintenance" />
+                      <core:Item key="Retired" text="Retired" />
+                    </items>
+                  </Select>
+                </HBox>
+                <Text text="{page>/listHelp}" class="listHelp" wrapping="true" />
+                <List
+                  id="assetList"
+                  class="assetList"
+                  mode="None"
+                  growing="false"
+                  items="{page>/items}"
+                  noDataText="No assets match these filters. Change the search or filters and try again."
+                  busyIndicatorDelay="0">
+                  <CustomListItem type="Active" press=".onSelectAsset" class="assetListItem">
+                    <HBox class="assetListLine" justifyContent="SpaceBetween" alignItems="Start">
+                      <VBox class="assetSummary" width="78%">
+                        <Title text="{page>assetName}" level="H4" wrapping="true" />
+                        <Text text="{page>type} · {page>assetID}" class="secondaryText" wrapping="true" />
+                        <Text text="Assigned to: {page>allocatedTo}" class="secondaryText" visible="{= !!${page>allocatedTo} }" wrapping="true" />
+                        <Text text="{page>complianceLabel}" class="complianceLine" visible="{= !!${page>complianceLabel} }" wrapping="true" />
+                      </VBox>
+                      <ObjectStatus text="{page>status}" state="None" class="listStatus" />
+                    </HBox>
+                  </CustomListItem>
+                </List>
+                <Toolbar class="pagingToolbar">
+                  <Text text="Page {page>/pageNumber} · {page>/totalCount} assets" />
+                  <ToolbarSpacer />
+                  <Button icon="sap-icon://navigation-left-arrow" tooltip="Previous page" enabled="{page>/hasPrevious}" press=".onPreviousPage" />
+                  <Button icon="sap-icon://navigation-right-arrow" tooltip="Next page" enabled="{page>/hasMore}" press=".onNextPage" />
+                </Toolbar>
+              </VBox>
+
+              <VBox id="detailPanel" class="detailPanel" width="61%" visible="{page>/detailVisible}">
+                <Button text="Back to list" icon="sap-icon://nav-back" type="Transparent" press=".onBackToList" class="mobileBackButton" visible="{page>/mobileDetail}" />
+                <VBox class="detailContent" visible="{page>/hasSelection}">
+                  <HBox alignItems="Start" justifyContent="SpaceBetween" class="detailTitleRow">
+                    <VBox class="detailHeading">
+                      <Title text="{page>/selected/assetName}" level="H1" wrapping="true" />
+                      <Text text="{page>/selected/assetID}" class="secondaryText" />
+                    </VBox>
+                    <ObjectStatus text="{page>/selectedStatus}" state="{page>/selectedStatusState}" class="detailStatus" />
+                  </HBox>
+                  <HBox class="detailFacts" wrap="Wrap">
+                    <VBox class="fact"><Label text="Type" /><Text text="{page>/selected/type}" /></VBox>
+                    <VBox class="fact"><Label text="Purchase date" /><Text text="{= ${page>/selected/purchaseDate} || 'Not recorded' }" /></VBox>
+                    <VBox class="fact"><Label text="Expiry / warranty" /><Text text="{= ${page>/selected/expiryDate} || (${page>/selected/type} === 'Hardware' ? 'No warranty date recorded' : 'No expiry date recorded') }" /></VBox>
+                    <VBox class="fact"><Label text="Assigned to" /><Text text="{page>/selected/allocatedTo}" /></VBox>
+                    <VBox class="fact" visible="{= !!${page>/selected/retirementReason} }"><Label text="Retirement reason" /><Text text="{page>/selected/retirementReason}" wrapping="true" /></VBox>
+                  </HBox>
+                  <MessageStrip text="{page>/detailComplianceText}" type="{page>/detailComplianceType}" showIcon="true" visible="{page>/detailComplianceVisible}" />
+                  <Toolbar class="actionToolbar">
+                    <Title text="Lifecycle actions" level="H3" />
+                    <ToolbarSpacer />
+                    <Button text="Edit name" icon="sap-icon://edit" press=".onEditAsset" visible="{page>/showEdit}" />
+                    <Button text="Allocate" icon="sap-icon://employee-approvals" type="Emphasized" press=".onAllocate" visible="{page>/showAllocate}" />
+                    <Button text="Return" icon="sap-icon://undo" press=".onReturn" visible="{page>/showReturn}" />
+                    <Button text="Renew license" icon="sap-icon://history" press=".onRenew" visible="{page>/showRenew}" />
+                    <Button text="Maintenance" icon="sap-icon://wrench" press=".onMaintenance" visible="{page>/showMaintenance}" />
+                    <Button text="Release" icon="sap-icon://accept" press=".onReleaseMaintenance" visible="{page>/showRelease}" />
+                    <Button text="Retire" icon="sap-icon://decline" type="Reject" press=".onRetire" visible="{page>/showRetire}" />
+                    <Button text="Delete" icon="sap-icon://delete" type="Reject" press=".onDeleteAsset" visible="{page>/showDelete}" />
+                  </Toolbar>
+                  <Text text="{page>/historyCaption}" class="sectionCaption" />
+                  <Table
+                    id="historyTable"
+                    items="{page>/history}"
+                    noDataText="No allocation history is available for this asset."
+                    growing="false"
+                    busy="{page>/historyLoading}"
+                    busyIndicatorDelay="0"
+                    class="historyTable">
+                    <columns>
+                      <Column><Text text="Employee" /></Column>
+                      <Column><Text text="Assigned" /></Column>
+                      <Column><Text text="Returned" /></Column>
+                    </columns>
+                    <items>
+                      <ColumnListItem>
+                        <cells>
+                          <Text text="{page>employeeName}" />
+                          <Text text="{page>assignedDate}" />
+                          <Text text="{= ${page>returnedDate} || 'Active assignment' }" />
+                        </cells>
+                      </ColumnListItem>
+                    </items>
+                  </Table>
+                </VBox>
+                <VBox class="detailEmpty" alignItems="Center" justifyContent="Center" visible="{= !${page>/hasSelection} }">
+                  <core:Icon src="sap-icon://laptop" size="2rem" decorative="true" />
+                  <Title text="{page>/selectedTitle}" level="H3" />
+                  <Text text="Choose an asset from the list to review its details and history." wrapping="true" />
+                </VBox>
+              </VBox>
+            </HBox>
+
+              <VBox id="compliancePanel" class="compliancePanel" width="100%" visible="{page>/complianceVisible}">
+                <Toolbar class="panelToolbar">
+                  <Title text="Compliance and idle assets" level="H1" />
+                  <ToolbarSpacer />
+                  <Button text="Refresh alerts" icon="sap-icon://refresh" press=".onRefresh" />
+                </Toolbar>
+                <MessageStrip text="{page>/complianceIntro}" type="Information" showIcon="true" class="complianceIntro" />
+                <HBox class="alertSummary" wrap="Wrap">
+                  <VBox class="summaryCard"><Label text="Expired licenses" /><ObjectNumber number="{page>/counts/expiredLicenses}" state="Error" /></VBox>
+                  <VBox class="summaryCard"><Label text="Expiring soon" /><ObjectNumber number="{page>/counts/expiringLicenses}" state="Warning" /></VBox>
+                  <VBox class="summaryCard"><Label text="Hardware warranties" /><ObjectNumber number="{page>/counts/hardwareWarrantyAlerts}" state="Information" /></VBox>
+                  <VBox class="summaryCard"><Label text="Idle available" /><ObjectNumber number="{page>/counts/idleAssets}" state="Warning" /></VBox>
+                </HBox>
+                <VBox class="alertGroups">
+                  <Panel headerText="Expired software licenses" expandable="false" class="alertPanel">
+                    <List items="{page>/complianceGroups/0/items}" noDataText="No expired software licenses." showSeparators="Inner">
+                      <StandardListItem title="{page>assetName}" description="{page>detailText}" info="{page>status}" infoState="Error" icon="sap-icon://message-error" />
+                    </List>
+                  </Panel>
+                  <Panel headerText="Software licenses expiring within the warning window" expandable="false" class="alertPanel">
+                    <List items="{page>/complianceGroups/1/items}" noDataText="No software licenses are expiring soon." showSeparators="Inner">
+                      <StandardListItem title="{page>assetName}" description="{page>detailText}" info="{page>alertLabel}" infoState="Warning" icon="sap-icon://message-warning" />
+                    </List>
+                  </Panel>
+                  <Panel headerText="Hardware warranty alerts" expandable="false" class="alertPanel">
+                    <List items="{page>/complianceGroups/2/items}" noDataText="No hardware warranty alerts." showSeparators="Inner">
+                      <StandardListItem title="{page>assetName}" description="{page>detailText}" info="{page>alertLabel}" infoState="Information" icon="sap-icon://wrench" />
+                    </List>
+                  </Panel>
+                  <Panel headerText="Idle available assets" expandable="false" class="alertPanel">
+                    <List items="{page>/complianceGroups/3/items}" noDataText="No idle available assets." showSeparators="Inner">
+                      <StandardListItem title="{page>assetName}" description="{page>detailText}" info="{page>status}" infoState="Warning" icon="sap-icon://lateness" />
+                    </List>
+                  </Panel>
+                  <Panel headerText="Data quality: missing expiry or warranty date" expandable="false" class="alertPanel">
+                    <List items="{page>/complianceGroups/4/items}" noDataText="No missing date records." showSeparators="Inner">
+                      <StandardListItem title="{page>assetName}" description="{page>detailText}" info="{page>alertLabel}" icon="sap-icon://alert" />
+                    </List>
+                  </Panel>
+                </VBox>
+              </VBox>
+          </VBox>
+        </VBox>
+      </content>
+    </Page>
+  </App>
+</mvc:View>

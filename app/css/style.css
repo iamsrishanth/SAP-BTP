@@ -1,0 +1,381 @@
+html,
+body,
+#content,
+#assetLifecycle,
+#assetLifecycle-component,
+#appRoot,
+#mainPage {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: #f5f7f9;
+}
+
+.assetPage,
+.appFrame {
+  min-height: 0;
+  background: #f5f7f9;
+}
+
+.assetShellBar {
+  background: #0a3768;
+  border-bottom: 1px solid #d4dce5;
+}
+
+.assetShellBar .sapFShellBarTitle,
+.assetShellBar .sapFShellBarPrimaryTitle,
+.assetShellBar .sapFShellBarSecondTitle,
+.assetShellBar .sapMBtnIcon,
+.assetShellBar .sapMBtnContent {
+  color: #fff !important;
+}
+
+.assetShellBar .sapFShellBarPrimaryTitle .sapMTitleInner,
+.assetShellBar .sapFShellBarPrimaryTitle span {
+  color: #fff !important;
+}
+
+.identityBar {
+  min-height: 2.75rem;
+  padding: 0.25rem 1.25rem;
+  background: #fff;
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.identitySummary {
+  gap: 0.65rem;
+}
+
+.identityActions {
+  gap: 0.5rem;
+}
+
+.identityText {
+  font-weight: 600;
+}
+
+.businessDate,
+.secondaryText,
+.listHelp,
+.sectionCaption,
+.loginHint {
+  color: #526274;
+}
+
+.sectionTabs {
+  background: #fff;
+}
+
+.feedbackStrip {
+  margin: 0.5rem 1rem 0;
+}
+
+.loadingRow {
+  margin: 0.35rem 1rem;
+}
+
+.loginHost {
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 1.5rem;
+  overflow: auto;
+}
+
+.loginCard {
+  max-width: calc(100vw - 2rem);
+  box-shadow: 0 0.25rem 1rem rgba(16, 42, 67, 0.12);
+}
+
+.loginContent {
+  gap: 0.75rem;
+  padding: 1rem;
+}
+
+.loginContent .sapMBtn {
+  margin-top: 0.35rem;
+}
+
+.workArea {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.workspace {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  gap: 0.75rem;
+  padding: 0.75rem;
+}
+
+.masterPanel,
+.detailPanel,
+.compliancePanel {
+  min-width: 0;
+  min-height: 0;
+  background: #fff;
+  border: 1px solid #dfe5eb;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.1rem 0.25rem rgba(16, 42, 67, 0.06);
+  overflow: hidden;
+}
+
+.compliancePanel {
+  flex: 1 1 auto;
+}
+
+.masterPanel {
+  flex: 0 0 39%;
+}
+
+.detailPanel {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.panelToolbar {
+  min-height: 3.5rem;
+  padding: 0 0.75rem;
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.masterPanel > .sapMSF,
+.filterRow,
+.listHelp {
+  margin: 0.65rem 0.75rem 0;
+}
+
+.filterRow {
+  gap: 0.4rem 0.5rem;
+}
+
+.filterRow .sapMLabel {
+  margin-left: 0.25rem;
+}
+
+.listHelp {
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.assetList {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  margin-top: 0.4rem;
+}
+
+.assetListItem {
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.assetListLine {
+  padding: 0.65rem 0.85rem;
+  gap: 0.5rem;
+}
+
+.assetSummary {
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.assetSummary .sapMTitle {
+  color: #12345a;
+  font-size: 1rem;
+}
+
+.secondaryText,
+.complianceLine {
+  font-size: 0.75rem;
+}
+
+.complianceLine {
+  color: #6b4b00;
+}
+
+.listStatus {
+  max-width: 8rem;
+  text-align: right;
+  white-space: normal;
+}
+
+.pagingToolbar {
+  flex: 0 0 auto;
+  border-top: 1px solid #e5eaf0;
+}
+
+.detailContent {
+  padding: 1.25rem;
+  gap: 1rem;
+}
+
+.detailTitleRow {
+  gap: 1rem;
+}
+
+.detailHeading {
+  min-width: 0;
+}
+
+.detailStatus {
+  margin-top: 0.35rem;
+}
+
+.detailFacts {
+  gap: 1rem 2rem;
+  padding: 0.85rem;
+  background: #f6f8fa;
+  border: 1px solid #e2e7ec;
+  border-radius: 0.35rem;
+}
+
+.fact {
+  min-width: 8rem;
+  max-width: 20rem;
+}
+
+.fact .sapMLabel {
+  color: #526274;
+  font-size: 0.75rem;
+}
+
+.fact .sapMText {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+
+.actionToolbar {
+  height: auto;
+  min-height: 3rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  border-top: 1px solid #e5eaf0;
+  border-bottom: 1px solid #e5eaf0;
+}
+
+.historyTable {
+  border: 1px solid #e5eaf0;
+  border-radius: 0.25rem;
+}
+
+.detailEmpty {
+  height: 100%;
+  min-height: 18rem;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  text-align: center;
+  color: #526274;
+}
+
+.detailEmpty .sapUiIcon {
+  color: #4776a8;
+}
+
+.mobileBackButton {
+  display: none;
+}
+
+.compliancePanel {
+  overflow: auto;
+  padding-bottom: 1rem;
+}
+
+.complianceIntro {
+  margin: 1rem 1rem 0;
+}
+
+.alertSummary {
+  padding: 1rem;
+  gap: 0.75rem;
+}
+
+.summaryCard {
+  min-width: 9.5rem;
+  padding: 0.75rem 1rem;
+  background: #f6f8fa;
+  border: 1px solid #e2e7ec;
+  border-radius: 0.35rem;
+}
+
+.summaryCard .sapMLabel {
+  color: #526274;
+}
+
+.alertGroups {
+  gap: 0.75rem;
+  padding: 0 1rem;
+}
+
+.alertPanel .sapMPanelContent {
+  padding: 0;
+}
+
+.assetDialogForm {
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+}
+
+.assetDialogForm .sapMLabel {
+  margin-top: 0.25rem;
+}
+
+.dialogHelp {
+  margin: 0.25rem 0;
+  color: #526274;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .identityBar {
+    padding: 0.35rem 0.75rem;
+    align-items: flex-start;
+  }
+
+  .businessDate {
+    display: none;
+  }
+
+  .workspace {
+    display: block;
+    padding: 0.5rem;
+  }
+
+  .masterPanel,
+  .detailPanel {
+    width: 100% !important;
+    height: 100%;
+    flex: 1 1 auto;
+  }
+
+  .masterPanel.mobileHidden,
+  .detailPanel.mobileHidden {
+    display: none;
+  }
+
+  .mobileBackButton {
+    display: inline-flex;
+    margin: 0.5rem;
+  }
+
+  .detailContent {
+    padding: 0.85rem;
+  }
+
+  .actionToolbar .sapMTitle {
+    width: 100%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

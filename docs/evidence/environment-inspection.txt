@@ -1,0 +1,29 @@
+IT Asset Lifecycle Management capstone — environment inspection
+Date: 2026-09-28
+Scope: read-only inspection of the authorized local repository and SAP Build/BAS workspace before implementation.
+
+LOCAL WINDOWS WORKSPACE
+- Repository: C:\Code\SAP\SAP-BTP
+- Origin: https://github.com/iamsrishanth/SAP-BTP.git
+- Initial repository state: empty main branch with no application source. The CAP/UI5 implementation, configuration, and assessment artifacts were created later in this task.
+- Node.js: v24.16.0
+- npm: 11.13.0
+- Local commands absent from PATH before dependency installation: cds, cf, mbt, btp, ui5, java.
+- npm registry: https://registry.npmjs.org/
+- npm registry check found @cap-js/hana 3.1.1 (not the initially selected 2.30.27); package selection was corrected before dependency installation.
+- Local npm dependency installation completed with 109 packages added and 0 reported vulnerabilities.
+
+SAP BUILD / BUSINESS APPLICATION STUDIO
+- User supplied an authenticated SAP Build lobby browser tab and a BAS workspace tab. The original unsaved SAP Build project-creation wizard was left unchanged.
+- Existing SAP Build project opened read-only: AssetMaintenance, type Full-Stack Node.js Application, description “Asset Maintenance Tracker (CAP + Fiori Elements)”.
+- BAS workspace root shown by its URL: /home/user/projects/AssetMaintenance.
+- The Project Overview storyboard showed data model namespace asset.maintenance with Asset, Technician, MaintenanceRequest; service MaintenanceService with Assets, Technicians, MaintenanceRequests, overdueAssets, scheduleMaintenance, and completeMaintenance; and no UI application in the User Interfaces section.
+- Existing package configuration showed CAP mocked authentication users/roles for Manager, Technician, Viewer and a production XSUAA profile. Existing prompt-history file PROMPTS.md included earlier project prompts, including UI annotations, service extensions, and security/deployment. These are pre-existing project records, not prompts executed by this task.
+- Read-only terminal inspection confirmed project files including package.json, package-lock.json, mta.yaml, srv/service.cds, srv/handlers.js, xs-security.json, and PROMPTS.md.
+- Prior terminal contents showed CAP v9.9.3 had been started in the workspace and later stopped; this was pre-existing terminal history and is not counted as this task's execution result.
+- A prior read-only Cloud Foundry app listing showed existing stopped apps. They were not modified. Actual target services, entitlements, and deployment permissions still require a later check before any deployment.
+
+TASK-AUTHORED BUILD CODE USAGE
+- One `/code-search` prompt was submitted through the Joule panel in the BAS workspace on 2026-09-28. The exact prompt and pending result are recorded in docs/assessment/build-code-prompt-log.md. It requested read-only inspection and explicitly requested no file edits. Joule displayed a notice that Code Search would index workspace content. No generated source changes were requested by that prompt.
+
+Evidence limits: this text record is a contemporaneous transcription of the initial local shell output and visible BAS browser state. The assessment source screenshots are not execution evidence. Later local application screenshots, logs, and browser workflow evidence are indexed separately in docs/assessment/execution-evidence.md. No Cloud Foundry deployment or Build Code-generated implementation is claimed.

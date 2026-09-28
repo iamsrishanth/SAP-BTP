@@ -1,0 +1,5 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 copy:ui
+> node scripts/copy-ui.js
+
+Copied SAPUI5 assets from app to gen\srv\app.
