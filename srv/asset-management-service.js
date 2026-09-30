@@ -60,6 +60,18 @@ function isDatabaseLockError(error) {
   return false
 }
 
+function isDuplicateKeyError(error) {
+  let current = error
+  while (current) {
+    const code = String(current.code || '')
+    const message = String(current.message || '')
+    if (['ENTITY_ALREADY_EXISTS', 'SQLITE_CONSTRAINT_PRIMARYKEY', 'SQLITE_CONSTRAINT_UNIQUE', '301'].includes(code) ||
+      /UNIQUE constraint failed|unique constraint violated/i.test(message)) return true
+    current = current.cause
+  }
+  return false
+}
+
 function mapConcurrentWriteError(req, error) {
   if (isDatabaseLockError(error)) {
     reject(req, 409, 'ASSET_CONCURRENT_CHANGE', 'The asset changed during this request. Refresh the inventory and try again.')
@@ -121,6 +133,15 @@ function validateAssetName(req, name) {
   return name.trim()
 }
 
+function validateEmployeeMappingText(req, value, field, maxLength) {
+  if (typeof value !== 'string' || !value.trim() || value.trim().length > maxLength || /[\p{Cc}\p{Cf}]/u.test(value)) {
+    reject(req, 400, 'INVALID_EMPLOYEE_MAPPING', `${field} is required, must contain no control characters, and must be no longer than ${maxLength} characters.`)
+  }
+  // Authenticated subject IDs are stable and case-sensitive. Trim surrounding
+  // whitespace only; never derive authorization from the display name.
+  return value.trim()
+}
+
 function validType(req, type) {
   if (!VALID_TYPES.has(type)) reject(req, 400, 'INVALID_ASSET_TYPE', 'type must be Hardware or Software.')
 }
@@ -172,7 +193,7 @@ async function readAsset(tx, DbAsset, assetID) {
 
 async function activeHistoryFor(tx, DbAllocationHistory, assetID) {
   return tx.run(
-    SELECT.from(DbAllocationHistory).columns('allocID').where({ asset_assetID: assetID, returnedDate: null })
+    SELECT.from(DbAllocationHistory).columns('allocID').where({ assetID_assetID: assetID, returnedDate: null })
   )
 }
 
@@ -232,7 +253,7 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
           reject(req, 409, 'ASSET_NOT_DELETABLE', 'Only an unassigned Available asset without allocation history can be physically deleted.')
         }
         const history = await tx.run(
-          SELECT.one.from(DbAllocationHistory).columns('allocID').where({ asset_assetID: assetID })
+          SELECT.one.from(DbAllocationHistory).columns('allocID').where({ assetID_assetID: assetID })
         )
         if (history) {
           reject(req, 409, 'ASSET_HAS_HISTORY', 'Assets with allocation history must be retired instead of deleted.')
@@ -260,8 +281,23 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
 
       // Run against the persistence entity and inject an untrusted-client-proof identity predicate.
       // Only the public MyAssets fields are selected, even when a client requests `*`.
-      select.from = { ref: [DbAsset.name] }
-      select.columns = PUBLIC_MY_ASSET_COLUMNS.map(name => ({ ref: [name] }))
+      const firstReference = select.from?.ref?.[0]
+      if (!firstReference || select.from.ref.length !== 1) {
+        reject(req, 400, 'INVALID_MY_ASSETS_QUERY', 'A direct MyAssets read query is required.')
+      }
+      // OData key predicates are embedded in the FROM reference. Preserve them
+      // while replacing only the service projection name with its persistence entity.
+      select.from.ref[0] = typeof firstReference === 'string'
+        ? DbAsset.name
+        : { ...firstReference, id: DbAsset.name }
+      const isCountQuery = select.columns?.length === 1 && select.columns[0].func === 'count'
+      if (!isCountQuery) {
+        const requested = select.columns
+        select.columns = !requested?.length || requested.some(column => column === '*' || column.ref?.[0] === '*')
+          ? PUBLIC_MY_ASSET_COLUMNS.map(name => ({ ref: [name] }))
+          : requested.filter(column => column.ref?.length === 1 && PUBLIC_MY_ASSET_COLUMNS.includes(column.ref[0]))
+        if (!select.columns.length) reject(req, 400, 'INVALID_MY_ASSETS_COLUMNS', 'Select public MyAssets fields only.')
+      }
       appendWhere(select, [{ ref: ['allocatedToUserId'] }, '=', { val: userId }])
       return cds.tx(req).run(query)
     })
@@ -277,6 +313,23 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
     })
     this.before('UPSERT', AllocationHistories, req => {
       reject(req, 405, 'HISTORY_IMMUTABLE', 'Allocation history cannot be upserted.')
+    })
+
+    this.on('provisionEmployee', async req => {
+      const actorId = requirePrincipal(req)
+      const userId = validateEmployeeMappingText(req, req.data.userId, 'userId', 255)
+      const displayName = validateEmployeeMappingText(req, req.data.displayName, 'displayName', 200)
+      const tx = cds.tx(req)
+      try {
+        const existing = await tx.run(SELECT.one.from(DbEmployee).columns('userId').where({ userId }))
+        if (existing) reject(req, 409, 'EMPLOYEE_ALREADY_EXISTS', 'This authenticated subject already has an employee mapping. Existing mappings cannot be overwritten.')
+        await tx.run(INSERT.into(DbEmployee).entries({ userId, displayName, active: true, ...auditInsert(actorId) }))
+        return { userId, displayName, active: true }
+      } catch (error) {
+        if (isDuplicateKeyError(error)) reject(req, 409, 'EMPLOYEE_ALREADY_EXISTS', 'This authenticated subject already has an employee mapping. Existing mappings cannot be overwritten.')
+        if (isDatabaseLockError(error)) reject(req, 409, 'EMPLOYEE_CONCURRENT_CHANGE', 'Employee mappings changed during this request. Refresh the employee list before retrying.')
+        throw error
+      }
     })
 
     this.on('allocateAsset', async req => {
@@ -322,7 +375,7 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
 
         await tx.run(INSERT.into(DbAllocationHistory).entries({
           allocID: cds.utils.uuid(),
-          asset_assetID: assetID,
+          assetID_assetID: assetID,
           employeeName: employee.displayName,
           employeeUserId: employee.userId,
           assignedDate: today,
@@ -352,12 +405,15 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
           reject(req, 409, 'ASSET_NOT_ALLOCATED', 'Only a currently allocated asset can be returned.')
         }
         const activeHistory = await tx.run(
-          SELECT.from(DbAllocationHistory).where({ asset_assetID: assetID, returnedDate: null })
+          SELECT.from(DbAllocationHistory).where({ assetID_assetID: assetID, returnedDate: null })
         )
         if (activeHistory.length !== 1) {
           reject(req, 409, 'ALLOCATION_HISTORY_INCONSISTENT', 'Return requires exactly one active history record; no asset fields were changed.')
         }
         const history = activeHistory[0]
+        if (history.employeeUserId !== asset.allocatedToUserId || history.employeeName !== asset.allocatedTo) {
+          reject(req, 409, 'ALLOCATION_HISTORY_INCONSISTENT', 'The active history assignee does not match the current asset assignment; no asset fields were changed.')
+        }
         const assignedDate = asDate(history.assignedDate)
         if (!assignedDate || today < assignedDate) {
           reject(req, 409, 'RETURN_DATE_INVALID', 'The business date cannot precede the allocation date.')
@@ -383,7 +439,10 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
         const closed = await tx.run(
           UPDATE(DbAllocationHistory)
             .set({ returnedDate: today, ...auditUpdate(actorId) })
-            .where({ allocID: history.allocID, asset_assetID: assetID, returnedDate: null })
+            .where({
+              allocID: history.allocID, assetID_assetID: assetID, returnedDate: null,
+              employeeUserId: asset.allocatedToUserId, employeeName: asset.allocatedTo
+            })
         )
         assertOneRow(req, closed, 'ALLOCATION_HISTORY_INCONSISTENT')
         const updated = await readAsset(tx, DbAsset, assetID)
@@ -523,14 +582,14 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
       const warningEnd = dateOffset(today, warningDays)
       const assets = await tx.run(SELECT.from(DbAsset))
       const history = await tx.run(
-        SELECT.from(DbAllocationHistory).columns('asset_assetID', 'returnedDate')
+        SELECT.from(DbAllocationHistory).columns('assetID_assetID', 'returnedDate')
       )
 
       const latestReturnByAsset = new Map()
       for (const allocation of history) {
         const returnedDate = asDate(allocation.returnedDate)
         if (!returnedDate) continue
-        const assetID = allocation.asset_assetID
+        const assetID = allocation.assetID_assetID
         const previous = latestReturnByAsset.get(assetID)
         if (!previous || returnedDate > previous) latestReturnByAsset.set(assetID, returnedDate)
       }

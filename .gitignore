@@ -1,4 +1,5 @@
 node_modules/
+db-backups/
 .deploy/app-router/node_modules/
 .deploy/app-router/default-env.json
 db.sqlite

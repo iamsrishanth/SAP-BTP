@@ -8,7 +8,7 @@
     "node": ">=22"
   },
   "scripts": {
-    "db:deploy": "cds deploy",
+    "db:deploy": "node scripts/migrate-history-association.js && cds deploy --with-auto-schema-evolution",
     "start": "cds-serve",
     "watch": "cds watch",
     "compile": "cds compile db/schema.cds srv/asset-management-service.cds --to json",
@@ -31,6 +31,7 @@
     "requires": {
       "db": {
         "kind": "sqlite",
+        "schema_evolution": "auto",
         "credentials": {
           "url": "db.sqlite"
         },

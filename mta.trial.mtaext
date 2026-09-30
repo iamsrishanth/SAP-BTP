@@ -1,0 +1,9 @@
+_schema-version: 3.3.0
+ID: sap-btp-it-asset-lifecycle-trial
+extends: sap-btp-it-asset-lifecycle
+description: "Target the user-authorized loyalty-reward-db HANA Cloud instance using an isolated capstone HDI container"
+resources:
+  - name: sap-btp-it-asset-lifecycle-db
+    parameters:
+      config:
+        database_id: 0dda540b-396a-487b-b665-805ed690ec14

@@ -6,6 +6,10 @@ process.env.ASSET_IDLE_DAYS = '30'
 process.env.ASSET_SEED_DEMO = 'true'
 
 const assert = require('node:assert/strict')
+const fs = require('node:fs')
+const os = require('node:os')
+const path = require('node:path')
+const { spawnSync } = require('node:child_process')
 const cds = require('@sap/cds')
 // The normal application profile uses persistent db.sqlite. Force a fresh
 // in-memory SQLite database for the test server so CAP deploys its schema
@@ -21,6 +25,38 @@ const USERS = {
   jamie: { username: 'employee.jamie', password: 'demo-employee' },
   compliance: { username: 'compliance.manager', password: 'demo-compliance' }
 }
+// Schema snapshot from initial project commit 5a02795: old association name,
+// and no audit fields on Employee. The fixture must not derive from new DDL.
+const LEGACY_SCHEMA = `
+namespace it.asset.lifecycle;
+using { managed } from '@sap/cds/common';
+entity Asset : managed {
+  key assetID : UUID;
+  assetName : String(200) not null;
+  type : String(20) not null;
+  purchaseDate : Date not null;
+  expiryDate : Date;
+  status : String(30) not null default 'Available';
+  allocatedTo : String(200);
+  allocatedToUserId : String(255);
+  maintenanceReason : String(500);
+  retiredAt : Timestamp;
+  retirementReason : String(500);
+}
+entity AllocationHistory : managed {
+  key allocID : UUID;
+  asset : Association to Asset not null;
+  employeeName : String(200) not null;
+  employeeUserId : String(255) not null;
+  assignedDate : Date not null;
+  returnedDate : Date;
+}
+entity Employee {
+  key userId : String(255);
+  displayName : String(200) not null;
+  active : Boolean not null default true;
+}
+`
 let fixtureNumber = 0
 
 function options(user) {
@@ -71,7 +107,7 @@ async function compliance(user = USERS.compliance) {
 async function historyFor(assetID) {
   const response = await GET(`${ROOT}AllocationHistories?$top=1000`, options(USERS.admin))
   assert.equal(response.status, 200, `History read failed: ${JSON.stringify(response.data)}`)
-  return rows(response).filter(row => row.asset_assetID === assetID)
+  return rows(response).filter(row => row.assetID_assetID === assetID)
 }
 
 async function allocate(assetID, employeeUserId = 'employee.alex', user = USERS.admin) {
@@ -142,6 +178,100 @@ describe('Asset Management CAP service', function () {
     assert.ok(rows(widened).every(asset => asset.assetName !== 'DEMO-Allocated-Software-Jamie'))
   })
 
+  it('preserves employee key predicates, selected fields and accurate scoped counts', async function () {
+    const initial = rows(await GET(`${ROOT}MyAssets`, options(USERS.alex)))
+    const foreign = rows(await GET(`${ROOT}MyAssets`, options(USERS.jamie)))[0]
+    const extra = await createAsset({ name: uniqueName('MY-ASSETS-KEY') })
+    assert.equal((await allocate(extra.assetID)).status, 200)
+    const ownKey = await GET(`${ROOT}MyAssets(${extra.assetID})`, options(USERS.alex))
+    assert.equal(ownKey.status, 200)
+    assert.equal(body(ownKey).assetID, extra.assetID)
+    for (const id of [foreign.assetID, '00000000-0000-4000-8000-000000000001']) {
+      assert.equal((await GET(`${ROOT}MyAssets(${id})`, options(USERS.alex))).status, 404)
+    }
+    const count = await GET(`${ROOT}MyAssets/$count`, options(USERS.alex))
+    assert.equal(count.status, 200)
+    assert.equal(Number(count.data), initial.length + 1)
+    const paged = await GET(`${ROOT}MyAssets?$count=true&$top=1&$skip=1`, options(USERS.alex))
+    assert.equal(paged.status, 200)
+    assert.equal(paged.data['@odata.count'], initial.length + 1)
+    assert.equal(rows(paged).length, 1)
+    const selected = await GET(`${ROOT}MyAssets?$select=assetName`, options(USERS.alex))
+    assert.equal(selected.status, 200)
+    assert.ok(rows(selected).every(row => Object.keys(row).every(key => ['assetID', 'assetName'].includes(key))))
+    assert.equal((await returnAsset(extra.assetID)).status, 200)
+  })
+
+  it('provisions exact trusted subject mappings with authenticated administrator auditing', async function () {
+    const subject = `employee.MixedCase-${Date.now()}@Example.com`
+    const provisioned = await POST(`${ROOT}provisionEmployee`, { userId: ` ${subject} `, displayName: ' New Employee ' }, options(USERS.admin))
+    assert.equal(provisioned.status, 200)
+    const { '@odata.context': context, ...mapping } = body(provisioned)
+    assert.equal(context, '$metadata#Employees/$entity')
+    assert.deepEqual(mapping, { userId: subject, displayName: 'New Employee', active: true })
+    const { Employee } = cds.entities('it.asset.lifecycle')
+    const stored = await cds.db.run(cds.ql.SELECT.one.from(Employee).where({ userId: subject }))
+    assert.equal(stored.createdBy, 'it.admin')
+    assert.equal(stored.modifiedBy, 'it.admin')
+    assert.ok(stored.createdAt)
+    assert.ok(stored.modifiedAt)
+    const caseVariant = subject.toLowerCase()
+    assert.equal((await POST(`${ROOT}provisionEmployee`, { userId: caseVariant, displayName: 'Case Distinct' }, options(USERS.admin))).status, 200)
+    const asset = await createAsset({ name: uniqueName('PROVISIONED-ASSIGNEE') })
+    assert.equal((await allocate(asset.assetID, subject)).status, 200)
+    const allocated = body(await GET(`${ROOT}Assets(${asset.assetID})`, options(USERS.admin)))
+    assert.equal(allocated.allocatedToUserId, subject)
+    assert.equal(allocated.allocatedTo, 'New Employee')
+    const mappingRead = body(await GET(`${ROOT}Employees('${encodeURIComponent(subject)}')`, options(USERS.admin)))
+    assert.deepEqual(Object.keys(mappingRead).filter(key => !key.startsWith('@')).sort(), ['active', 'displayName', 'userId'])
+    // Development mocked auth can create a role-less principal for an unknown
+    // username. A persisted mapping must not promote that principal's roles.
+    const mappedPrincipal = { username: subject, password: 'development-only' }
+    const mappingSession = body(await GET(`${ROOT}sessionInfo()`, options(mappedPrincipal)))
+    assert.equal(mappingSession.userId, subject)
+    assert.deepEqual(mappingSession.roles, [])
+    assert.equal((await GET(`${ROOT}MyAssets`, options(mappedPrincipal))).status, 403)
+    assert.equal((await GET(`${ROOT}Assets`, options(mappedPrincipal))).status, 403)
+    assert.ok(!Object.hasOwn(stored, 'password'))
+  })
+
+  it('rejects invalid, duplicate and non-admin employee provisioning without mutable mappings', async function () {
+    const valid = { userId: uniqueName('PROVISION-DENIED'), displayName: 'New Employee' }
+    for (const user of [USERS.alex, USERS.compliance]) {
+      assert.equal((await POST(`${ROOT}provisionEmployee`, valid, options(user))).status, 403)
+      assert.equal((await POST(`${ROOT}Employees`, valid, options(user))).status, 403)
+    }
+    for (const payload of [
+      {}, { userId: ' ', displayName: 'New Employee' }, { userId: 'employee.new', displayName: ' ' },
+      { userId: 'x'.repeat(256), displayName: 'New Employee' }, { userId: 'employee.new', displayName: 'x'.repeat(201) },
+      { userId: 'employee.new\n', displayName: 'New Employee' }, { userId: 'employee.\u0000new', displayName: 'New Employee' },
+      { userId: 'employee.new', displayName: 'New\tEmployee' }, { userId: 'employee.new\u202E', displayName: 'New Employee' }
+    ]) assert.equal((await POST(`${ROOT}provisionEmployee`, payload, options(USERS.admin))).status, 400)
+    for (const userId of ['employee.alex', 'employee.inactive']) {
+      const duplicate = await POST(`${ROOT}provisionEmployee`, { userId, displayName: 'Forged Rename' }, options(USERS.admin))
+      assert.equal(duplicate.status, 409)
+      assert.equal(duplicate.data.error.code, 'EMPLOYEE_ALREADY_EXISTS')
+    }
+    const inactive = body(await GET(`${ROOT}Employees('employee.inactive')`, options(USERS.admin)))
+    assert.equal(inactive.active, false)
+    assert.equal(inactive.displayName, 'Inactive Employee')
+    assert.equal((await POST(`${ROOT}Employees`, valid, options(USERS.admin))).status, 403)
+    assert.equal((await PATCH(`${ROOT}Employees('employee.alex')`, { displayName: 'Forged Rename' }, options(USERS.admin))).status, 403)
+    assert.equal((await DELETE(`${ROOT}Employees('employee.alex')`, options(USERS.admin))).status, 403)
+  })
+
+  it('allows one concurrent mapping insert without duplicate or overwritten identity records', async function () {
+    const userId = uniqueName('PROVISION-CONCURRENT')
+    const responses = await Promise.all(['First Snapshot', 'Second Snapshot'].map(displayName => POST(`${ROOT}provisionEmployee`, { userId, displayName }, options(USERS.admin))))
+    assert.equal(responses.filter(response => response.status === 200).length, 1)
+    assert.equal(responses.filter(response => response.status === 409).length, 1)
+    const { Employee } = cds.entities('it.asset.lifecycle')
+    const persisted = await cds.db.run(cds.ql.SELECT.from(Employee).where({ userId }))
+    assert.equal(persisted.length, 1)
+    assert.equal(persisted[0].displayName, body(responses.find(response => response.status === 200)).displayName)
+    assert.equal(persisted[0].createdBy, 'it.admin')
+  })
+
   it('registers, reads, edits, and safely deletes only an unassigned asset without history', async function () {
     const created = await createAsset({ name: uniqueName('CRUD'), type: 'Hardware' })
     const id = created.assetID
@@ -210,6 +340,36 @@ describe('Asset Management CAP service', function () {
     assert.equal(pastLicenseDate.status, 400)
   })
 
+  it('rejects absent names, absent purchase dates and invalid calendar dates without creating rows', async function () {
+    const before = Number((await GET(`${ROOT}Assets/$count`, options(USERS.admin))).data)
+    const badPayloads = [
+      { type: 'Hardware', purchaseDate: plusDays(-5) },
+      { assetName: ' ', type: 'Hardware', purchaseDate: plusDays(-5) },
+      { assetName: uniqueName('NO-PURCHASE-DATE'), type: 'Hardware' },
+      ...['2026-02-30', '2026-13-01', '0000-00-00', '2026-9-1'].map(purchaseDate => ({ assetName: uniqueName('BAD-CALENDAR'), type: 'Hardware', purchaseDate }))
+    ]
+    for (const payload of badPayloads) assert.equal((await POST(`${ROOT}Assets`, payload, options(USERS.admin))).status, 400)
+    assert.equal(Number((await GET(`${ROOT}Assets/$count`, options(USERS.admin))).data), before)
+  })
+
+  it('rejects nonexistent lifecycle UUIDs, missing arguments and inactive or unknown assignees', async function () {
+    const absent = '00000000-0000-4000-8000-000000000002'
+    for (const action of ['allocateAsset', 'returnAsset', 'renewSoftwareLicense', 'placeInMaintenance', 'releaseFromMaintenance', 'retireAsset']) {
+      const payload = { assetID: absent }
+      if (action === 'allocateAsset') payload.employeeUserId = 'employee.alex'
+      if (action === 'renewSoftwareLicense') payload.newExpiryDate = plusDays(100)
+      if (['placeInMaintenance', 'retireAsset'].includes(action)) payload.reason = 'Test validation'
+      assert.equal((await POST(`${ROOT}${action}`, payload, options(USERS.admin))).status, 404, action)
+      assert.equal((await POST(`${ROOT}${action}`, {}, options(USERS.admin))).status, 400, `${action} missing arguments`)
+    }
+    const asset = await createAsset({ name: uniqueName('INVALID-ASSIGNEE') })
+    for (const employee of ['employee.unknown', 'employee.inactive', "employee.alex' OR '1'='1"]) {
+      assert.equal((await allocate(asset.assetID, employee)).status, 400)
+    }
+    assert.equal((await historyFor(asset.assetID)).length, 0)
+    assert.equal(body(await GET(`${ROOT}Assets(${asset.assetID})`, options(USERS.admin))).status, 'Available')
+  })
+
   it('allocates atomically, records the trusted employee, returns once, and preserves history', async function () {
     const created = await createAsset({ name: uniqueName('ALLOCATE'), type: 'Hardware' })
     const allocation = await allocate(created.assetID)
@@ -223,7 +383,7 @@ describe('Asset Management CAP service', function () {
     assert.equal(history[0].employeeUserId, 'employee.alex')
     assert.equal(history[0].returnedDate, null)
     assert.equal(history[0].assignedDate, TODAY)
-    assert.equal(history[0].asset_assetID, created.assetID)
+    assert.equal(history[0].assetID_assetID, created.assetID)
 
     const duplicate = await allocate(created.assetID, 'employee.jamie')
     assert.equal(duplicate.status, 409)
@@ -265,6 +425,29 @@ describe('Asset Management CAP service', function () {
     assert.equal(active.length, 1)
     const persisted = await GET(`${ROOT}Assets(${created.assetID})`, options(USERS.admin))
     assert.equal(body(persisted).status, 'Allocated')
+  })
+
+  it('rejects missing, duplicate and mismatched active return histories without partial updates', async function () {
+    const { AllocationHistory } = cds.entities('it.asset.lifecycle')
+    for (const corruption of ['missing', 'duplicate', 'employee-id', 'employee-name']) {
+      const asset = await createAsset({ name: uniqueName(`RETURN-${corruption}`) })
+      assert.equal((await allocate(asset.assetID)).status, 200)
+      const before = body(await GET(`${ROOT}Assets(${asset.assetID})`, options(USERS.admin)))
+      const active = await cds.db.run(cds.ql.SELECT.one.from(AllocationHistory).where({ assetID_assetID: asset.assetID, returnedDate: null }))
+      // Imported/corrupted-state fixtures are injected only into the isolated test database.
+      if (corruption === 'missing') await cds.db.run(cds.ql.DELETE.from(AllocationHistory).where({ allocID: active.allocID }))
+      if (corruption === 'duplicate') await cds.db.run(cds.ql.INSERT.into(AllocationHistory).entries({ ...active, allocID: cds.utils.uuid() }))
+      if (corruption === 'employee-id') await cds.db.run(cds.ql.UPDATE(AllocationHistory).set({ employeeUserId: 'employee.jamie' }).where({ allocID: active.allocID }))
+      if (corruption === 'employee-name') await cds.db.run(cds.ql.UPDATE(AllocationHistory).set({ employeeName: 'Jamie Chen' }).where({ allocID: active.allocID }))
+      const returned = await returnAsset(asset.assetID)
+      assert.equal(returned.status, 409, corruption)
+      assert.equal(returned.data.error.code, 'ALLOCATION_HISTORY_INCONSISTENT', corruption)
+      const after = body(await GET(`${ROOT}Assets(${asset.assetID})`, options(USERS.admin)))
+      for (const field of ['status', 'allocatedTo', 'allocatedToUserId', 'modifiedAt', 'modifiedBy']) assert.equal(after[field], before[field], `${corruption}: ${field}`)
+      const histories = await historyFor(asset.assetID)
+      assert.ok(histories.every(history => history.returnedDate === null), corruption)
+      assert.equal(histories.length, corruption === 'missing' ? 0 : corruption === 'duplicate' ? 2 : 1)
+    }
   })
 
   it('renews only software, updates compliance immediately, and leaves allocation status separate', async function () {
@@ -330,6 +513,15 @@ describe('Asset Management CAP service', function () {
     assert.equal(warranty.type, 'Hardware')
     assert.ok(!summary.expiredLicenses.some(row => row.assetName === 'DEMO-Retired-Laptop'))
 
+    const expiredHardware = await createAsset({ name: uniqueName('EXPIRED-HARDWARE-WARRANTY'), type: 'Hardware', expiryDate: plusDays(-1) })
+    const hardwareSummary = await compliance()
+    const hardwareAlert = hardwareSummary.hardwareWarrantyAlerts.find(row => row.assetID === expiredHardware.assetID)
+    assert.equal(hardwareAlert.alertType, 'Warranty Expired')
+    assert.equal(hardwareAlert.type, 'Hardware')
+    assert.equal(hardwareAlert.daysRemaining, -1)
+    assert.ok(!hardwareSummary.expiredLicenses.some(row => row.assetID === expiredHardware.assetID))
+    assert.ok(!hardwareSummary.expiringLicenses.some(row => row.assetID === expiredHardware.assetID))
+
     const noSoftwareDate = summary.missingDateAlerts.find(row => row.assetName === 'DEMO-Legacy-License-No-Expiry')
     const noWarrantyDate = summary.missingDateAlerts.find(row => row.assetName === 'DEMO-Hardware-No-Warranty-Date')
     assert.equal(noSoftwareDate.alertType, 'Missing License Expiry')
@@ -391,7 +583,7 @@ describe('Asset Management CAP service', function () {
     assert.equal(body(released).status, 'Available')
 
     const historyCreate = await POST(`${ROOT}AllocationHistories`, {
-      asset_assetID: created.assetID, employeeName: 'Forged', employeeUserId: 'employee.alex', assignedDate: TODAY
+      assetID_assetID: created.assetID, employeeName: 'Forged', employeeUserId: 'employee.alex', assignedDate: TODAY
     }, options(USERS.admin))
     assert.ok(historyCreate.status >= 400 && historyCreate.status < 500)
     const allHistory = await GET(`${ROOT}AllocationHistories?$top=1`, options(USERS.admin))
@@ -406,5 +598,77 @@ describe('Asset Management CAP service', function () {
     assert.ok(historyUpsert.status >= 400 && historyUpsert.status < 500)
     const historyDelete = await DELETE(`${ROOT}AllocationHistories(${sample.allocID})`, options(USERS.admin))
     assert.ok(historyDelete.status >= 400 && historyDelete.status < 500)
+  })
+
+  it('never enables demo runtime seeding in a production environment or profile', function () {
+    for (const environment of [{ NODE_ENV: 'production' }, { CDS_ENV: 'production' }]) {
+      const result = spawnSync(process.execPath, ['-e', "const assert=require('node:assert/strict');assert.equal(require('./db/seed').shouldSeedDemoData(),false)"], {
+        cwd: path.resolve(__dirname, '..'), encoding: 'utf8',
+        env: { ...process.env, NODE_ENV: 'development', CDS_ENV: 'development', ASSET_SEED_DEMO: 'true', ...environment }
+      })
+      assert.equal(result.status, 0, result.stderr)
+    }
+  })
+
+  it('migrates the required history association idempotently while preserving rows and a backup', async function () {
+    const { DatabaseSync } = require('node:sqlite')
+    const { migrateHistoryAssociation } = require('../scripts/migrate-history-association')
+    const fixtureDirectory = fs.mkdtempSync(path.join(os.tmpdir(), 'asset-history-migration-'))
+    const fixturePath = path.join(fixtureDirectory, 'legacy.sqlite')
+    let database
+    try {
+      const model = cds.minify(await cds.load('*'))
+      const legacyModel = cds.minify(cds.compile({
+        'db/schema.cds': LEGACY_SCHEMA,
+        '@sap/cds/common.cds': fs.readFileSync(require.resolve('@sap/cds/common.cds'), 'utf8'),
+        'srv/asset-management-service.cds': fs.readFileSync(path.join(__dirname, '../srv/asset-management-service.cds'), 'utf8')
+      }))
+      legacyModel.definitions['cds.outbox.Messages'] = structuredClone(model.definitions['cds.outbox.Messages'])
+      const schema = cds.compile.to.sql(legacyModel, { dialect: 'sqlite' })
+      database = new DatabaseSync(fixturePath)
+      for (const statement of schema) database.exec(statement)
+      assert.deepEqual(database.prepare('PRAGMA table_info(it_asset_lifecycle_Employee)').all().map(column => column.name), ['userId', 'displayName', 'active'])
+      database.prepare('INSERT INTO it_asset_lifecycle_Employee (userId,displayName,active) VALUES (?,?,?)').run('employee.alex', 'Alex Morgan', 1)
+      const id = cds.utils.uuid()
+      const allocationId = cds.utils.uuid()
+      database.prepare('INSERT INTO it_asset_lifecycle_Asset (assetID,assetName,type,purchaseDate,status,allocatedTo,allocatedToUserId) VALUES (?,?,?,?,?,?,?)').run(id, 'PRESERVED', 'Hardware', plusDays(-15), 'Allocated', 'Alex Morgan', 'employee.alex')
+      database.prepare('INSERT INTO it_asset_lifecycle_AllocationHistory (allocID,asset_assetID,employeeName,employeeUserId,assignedDate,returnedDate) VALUES (?,?,?,?,?,?)').run(allocationId, id, 'Alex Morgan', 'employee.alex', TODAY, null)
+      database.close()
+      database = undefined
+      const migrated = await migrateHistoryAssociation({ databasePath: fixturePath, backupDirectory: path.join(fixtureDirectory, 'backups'), model })
+      assert.equal(migrated.migrated, true)
+      assert.equal(migrated.associationRenamed, true)
+      assert.equal(migrated.employeeAuditColumnsAdded.length, 4)
+      assert.ok(fs.existsSync(migrated.backupPath))
+      database = new DatabaseSync(fixturePath)
+      const history = database.prepare('SELECT * FROM it_asset_lifecycle_AllocationHistory').all()
+      assert.equal(history.length, 1)
+      assert.equal(history[0].allocID, allocationId)
+      assert.equal(history[0].assetID_assetID, id)
+      assert.equal(history[0].employeeUserId, 'employee.alex')
+      assert.equal(history[0].returnedDate, null)
+      assert.equal(database.prepare('SELECT assetID FROM it_asset_lifecycle_Asset').get().assetID, id)
+      const preservedEmployee = database.prepare('SELECT * FROM it_asset_lifecycle_Employee').get()
+      assert.equal(preservedEmployee.userId, 'employee.alex')
+      assert.equal(preservedEmployee.displayName, 'Alex Morgan')
+      assert.equal(preservedEmployee.active, 1)
+      for (const field of ['createdAt', 'createdBy', 'modifiedAt', 'modifiedBy']) assert.equal(preservedEmployee[field], null)
+      const baseline = JSON.parse(database.prepare('SELECT csn FROM cds_model').get().csn)
+      const delta = cds.compile.to.sql.delta(model, { dialect: 'sqlite' }, baseline)
+      assert.deepEqual(delta.drops, [])
+      assert.deepEqual(delta.createsAndAlters, [])
+      database.close()
+      database = undefined
+      const repeated = await migrateHistoryAssociation({ databasePath: fixturePath, backupDirectory: path.join(fixtureDirectory, 'backups'), model })
+      assert.equal(repeated.migrated, false)
+      assert.equal(fs.readdirSync(path.join(fixtureDirectory, 'backups')).length, 1)
+      database = new DatabaseSync(migrated.backupPath, { readOnly: true })
+      assert.equal(database.prepare('SELECT asset_assetID FROM it_asset_lifecycle_AllocationHistory').get().asset_assetID, id)
+      assert.deepEqual(database.prepare('PRAGMA table_info(it_asset_lifecycle_Employee)').all().map(column => column.name), ['userId', 'displayName', 'active'])
+    } finally {
+      database?.close()
+      if (!fixtureDirectory.startsWith(path.resolve(os.tmpdir()) + path.sep)) throw new Error('Unsafe temporary fixture cleanup path')
+      fs.rmSync(fixtureDirectory, { recursive: true, force: true })
+    }
   })
 })

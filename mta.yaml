@@ -17,7 +17,12 @@ modules:
     path: gen/srv
     parameters:
       instances: 1
+      memory: 512M
+      disk-quota: 512M
       buildpack: nodejs_buildpack
+    properties:
+      ASSET_SEED_DEMO: "false"
+      ASSET_TIME_ZONE: Asia/Kolkata
     build-parameters:
       builder: npm-ci
     provides:
@@ -33,6 +38,8 @@ modules:
     path: gen/db
     parameters:
       buildpack: nodejs_buildpack
+      memory: 256M
+      disk-quota: 512M
     requires:
       - name: sap-btp-it-asset-lifecycle-db
   - name: sap-btp-it-asset-lifecycle

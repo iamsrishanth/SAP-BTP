@@ -94,17 +94,17 @@ function buildDemoData(today = businessToday()) {
 
   const allocations = [
     {
-      allocID: cds.utils.uuid(), asset_assetID: assetIds.allocatedLaptopAlex,
+      allocID: cds.utils.uuid(), assetID_assetID: assetIds.allocatedLaptopAlex,
       employeeName: 'Alex Morgan', employeeUserId: employeeAlex,
       assignedDate: offset(today, -12), returnedDate: null
     },
     {
-      allocID: cds.utils.uuid(), asset_assetID: assetIds.allocatedSoftwareJamie,
+      allocID: cds.utils.uuid(), assetID_assetID: assetIds.allocatedSoftwareJamie,
       employeeName: 'Jamie Chen', employeeUserId: employeeJamie,
       assignedDate: offset(today, -40), returnedDate: null
     },
     {
-      allocID: cds.utils.uuid(), asset_assetID: assetIds.returnedIdleMonitor,
+      allocID: cds.utils.uuid(), assetID_assetID: assetIds.returnedIdleMonitor,
       employeeName: 'Jamie Chen', employeeUserId: employeeJamie,
       assignedDate: offset(today, -100), returnedDate: offset(today, -31)
     }

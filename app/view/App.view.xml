@@ -78,6 +78,7 @@
                 <Toolbar class="panelToolbar">
                   <Title text="{page>/listTitle}" level="H2" />
                   <ToolbarSpacer />
+                  <Button text="Add employee" icon="sap-icon://add-employee" press=".onProvisionEmployee" visible="{page>/canAdmin}" />
                   <Button text="Register asset" icon="sap-icon://add" type="Emphasized" press=".onRegisterAsset" visible="{page>/canAdmin}" />
                 </Toolbar>
                 <SearchField

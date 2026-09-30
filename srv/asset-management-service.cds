@@ -67,6 +67,9 @@ service AssetManagementService {
   };
 
   @requires: 'ITAdmin'
+  action provisionEmployee(userId: String(255), displayName: String(200)) returns Employees;
+
+  @requires: 'ITAdmin'
   action allocateAsset(assetID: UUID, employeeUserId: String(255)) returns Assets;
 
   @requires: 'ITAdmin'

@@ -631,7 +631,7 @@ sap.ui.define([
         try {
           var assetId = asset.assetID;
           var payload = await this._request(this._query("AllocationHistories", {
-            "$filter": "asset_assetID eq " + assetId,
+            "$filter": "assetID_assetID eq " + assetId,
             "$orderby": "assignedDate desc",
             "$top": 100,
             "$skip": 0
@@ -889,6 +889,31 @@ sap.ui.define([
         alertLabel: label,
         detailText: detail.join(" · ") || label
       });
+    },
+
+    onProvisionEmployee: function () {
+      var userId = new Input({ maxLength: 255, required: true, placeholder: "Authenticated user ID from My Assets" });
+      var displayName = new Input({ maxLength: 200, required: true });
+      var fields = { content: [
+        this._labelControl("Authenticated employee user ID", userId, true),
+        this._labelControl("Employee display name", displayName, true),
+        new Text({ text: "Use the exact, case-sensitive identity reported after SAP BTP sign-in. This adds an allocation mapping; the Employee role is assigned separately in SAP BTP." }).addStyleClass("dialogHelp")
+      ] };
+      var dialog = this._formDialog("Add employee identity mapping", fields, "Add employee", async function () {
+        if (!userId.getValue().trim() || !displayName.getValue().trim()) {
+          this._feedback("Enter an authenticated user ID and employee display name.", "Warning");
+          return false;
+        }
+        await this._request("provisionEmployee", {
+          method: "POST",
+          body: JSON.stringify({ userId: userId.getValue().trim(), displayName: displayName.getValue() })
+        });
+        await this._loadEmployees();
+        this._feedback("Employee identity mapping added. The employee is now available for allocation.", "Success");
+        return true;
+      });
+      this.getView().addDependent(dialog);
+      dialog.open();
     },
 
     onRegisterAsset: function () {

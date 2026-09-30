@@ -23,7 +23,7 @@ entity Asset : managed {
 /** Immutable assignment snapshots; only returnedDate may be set once by returnAsset. */
 entity AllocationHistory : managed {
   key allocID        : UUID;
-      asset          : Association to Asset not null;
+      assetID        : Association to Asset not null;
       employeeName   : String(200) not null;
       employeeUserId : String(255) not null;
       assignedDate   : Date not null;
@@ -31,7 +31,7 @@ entity AllocationHistory : managed {
 }
 
 /** Trusted mapping between authenticated CAP subjects and employee display names. */
-entity Employee {
+entity Employee : managed {
   key userId      : String(255);
       displayName : String(200) not null;
       active      : Boolean not null default true;
