@@ -1,6 +1,13 @@
 const cds = require('@sap/cds')
 const { SELECT, INSERT, UPDATE, DELETE } = cds.ql
-const { businessToday, businessTimeZone } = require('../db/seed')
+const { businessToday, businessTimeZone } = require('./date-rules')
+
+// Demo fixtures live outside the generated service package. Load their
+// development-only listener only when demo seeding is enabled; the production
+// MTA explicitly sets ASSET_SEED_DEMO=false and therefore never resolves db/seed.
+if (!cds.env.profiles.includes('production') && process.env.ASSET_SEED_DEMO !== 'false') {
+  require('../db/seed')
+}
 
 const EXPECTED_ROLES = ['ITAdmin', 'Employee', 'ComplianceManager']
 const PUBLIC_MY_ASSET_COLUMNS = [
