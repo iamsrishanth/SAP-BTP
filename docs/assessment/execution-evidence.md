@@ -1,55 +1,50 @@
 # Execution Evidence Index
 
-**Snapshot:** 2026-09-28. This index separates local execution evidence from BAS/Build Code activity and cloud deployment. It does not claim that the assessment passed or was submitted.
+**Snapshot:** 2026-10-01 (Asia/Kolkata). This index separates local/BAS execution, Build Code generation, and Cloud Foundry deployment. It does not claim the assessment passed, a hidden evaluator passed, or the assessment was submitted.
 
-## Current status
+## Current execution summary
 
-The local CAP and SAPUI5 application was started against file-backed SQLite and exercised in a browser. The backend suite passed 10 tests. The UI was used for registration, allocation, return, persistence after browser refresh, and software renewal. Employee and Compliance Manager views were opened with their local mock identities. An axe accessibility audit of the Compliance Manager page after the final shell/landmark fix reported zero violations.
-
-The final source changed after the last production build and UI-copy command (the accessibility fix moved the ShellBar into the Page header and added Page landmarks). Re-run `npm run build` and `npm run copy:ui` before making a deployment package. UI retirement/maintenance was not browser-tested. The independent reviewer’s initial findings were repaired, but a final post-repair review has not been completed.
+- Source revision **f7d5c44** fixes the generated CAP package's shared date-rules import and production seed loading. The fix was pushed to the repository and pulled into the BAS clone.
+- The CAP model compiles; the CAP production build succeeds; the root lifecycle suite and independent security suite have separate results. Scale verification exercised 1,200 assets, OData ordering/filtering/paging, identity isolation, and allocation/return persistence across complete CAP process restarts. See the linked logs and JSON report below.
+- In BAS, the current clone completed the SQLite schema setup and started CAP on port 4004. The live SAPUI5 preview loaded the CAP-backed inventory, returned one server-filtered result for a name search, showed the Compliance Manager’s license/warranty/idle categories, and showed Alex only his own assigned asset and its detail. The browser page remained open at the port 4004 preview.
+- Cloud Foundry deployment was attempted after the package repair but did not complete. The MultiApps client remained at its initial archive-deploy message and hit a 300-second timeout before a new operation was registered. The only listed operation is the earlier failed deployment. The task apps remain stopped; no deployed runtime or cloud smoke result is claimed.
+- Build Code prompt BC-01 was actually submitted as a read-only Joule search. No result or generated files were returned. The current editor chat also requires a model/GitHub setup that is not available in this task. Build Code code generation remains blocked.
+- The assessment portal was not submitted.
 
 ## Evidence register
 
 | Evidence ID | Check | Result | Evidence / limitation |
 |---|---|---|---|
-| ENV-001 | Initial local environment and SAP workspace inspection | PASS for the inspection record | [environment-inspection.txt](../evidence/environment-inspection.txt) records local tools and read-only SAP Build/BAS workspace observations. Existing AssetMaintenance files were not changed. |
-| NPM-001 | Clean dependency installation | PASS | [npm-ci.log](../evidence/npm-ci.log): `npm ci` completed. [npm-lock-update.log](../evidence/npm-lock-update.log): lock-file update completed. |
-| DB-001 | Initialize persistent local SQLite schema | PASS | [local-db-deploy.log](../evidence/local-db-deploy.log): `npm run db:deploy` completed. SQLite database and sidecars are local ignored runtime files. |
-| CAP-001 | CDS model/service compile | PASS | [cap-compile.log](../evidence/cap-compile.log): CAP compile output for schema and service. |
-| TEST-001 | Backend lifecycle/security/compliance suite | PASS — 10 tests | [backend-tests.log](../evidence/backend-tests.log): all 10 HTTP integration tests passed against the fixed 2026-09-28 business date using in-memory SQLite. The suite covers roles, identity scoping, CRUD guards, allocation/return, concurrency, renewal, date/warranty/idle boundaries, retirement, maintenance, and history immutability. [backend-tests-initial-failure.log](../evidence/backend-tests-initial-failure.log) retains an earlier harness failure that was fixed before the passing run. |
-| BUILD-001 | CAP production build | PASS for the earlier source snapshot | [cap-production-build.log](../evidence/cap-production-build.log) and [copy-ui.log](../evidence/copy-ui.log) show a successful CAP build and UI copy before the final accessibility markup change. Rebuild the current source before deployment. |
-| APP-START-001 | Start local CAP app and observe service traffic | PASS | [local-run.log](../evidence/local-run.log) records the service at `/odata/v4/asset-management`, file-backed SQLite, and OData reads/writes from browser workflows. Setup requires `npm run db:deploy` before `npm run watch`. |
-| UI-ADMIN-001 | Admin register, allocate, return, and history | PASS for the exercised path | [ui-admin-allocation-history.png](../evidence/ui-admin-allocation-history.png), [ui-admin-returned-history.png](../evidence/ui-admin-returned-history.png), and [ui-admin-persisted-detail.png](../evidence/ui-admin-persisted-detail.png) show the created asset, its assignment, return date, and retained history. The returned asset was found again after page refresh and sign-in. |
-| UI-ADMIN-002 | Software license renewal | PASS for the exercised path | [ui-admin-renewal.png](../evidence/ui-admin-renewal.png) shows the software renewal success message and updated expiry. Backend validation/boundary tests are in [backend-tests.log](../evidence/backend-tests.log). |
-| UI-EMP-001 | Employee My Assets | PASS for the displayed list | [ui-employee-my-assets.png](../evidence/ui-employee-my-assets.png) shows the Employee view with Alex’s own assigned laptop only. The screenshot predates the final ShellBar contrast/landmark refinement; the post-fix accessibility audit is recorded separately. |
-| UI-COMP-001 | Compliance Manager alerts | PASS for the displayed view | [ui-compliance-alerts-final.png](../evidence/ui-compliance-alerts-final.png) shows distinct expired software, expiring software, hardware warranty, idle asset, and missing-date sections. Backend results include expiry today and the inclusive 30-day boundary. |
-| UI-A11Y-001 | Accessibility audit after final UI markup/style adjustment | PASS — 0 violations | [ui-a11y-audit.json](../evidence/ui-a11y-audit.json): axe 4.12.1, 37 passes, zero violations, zero incomplete checks on the Compliance Manager page. It is a scoped page audit, not a full manual accessibility certification. |
-| UI-SEARCH-001 | Inventory search/filter/paging at scale | NOT RUN | The UI requests server-side queries and pagination in source, but a large inventory/search/filter/paging walkthrough was not recorded. |
-| BAS-001 | Implement/build/run this solution in BAS | NOT RUN | BAS was accessible and an existing AssetMaintenance project was inspected. This task’s local solution was not copied into or run from that existing workspace. |
-| BC-01 | Actual Build Code/Joule prompt response | BLOCKED / pending | The exact read-only `/code-search` prompt is in [build-code-prompt-log.md](../assessment/build-code-prompt-log.md). Joule still showed `Thinking...` while indexing; no result or generated implementation is evidenced. |
-| CF-ACCESS-001 | Observe authenticated Cloud Foundry target | PASS — target observed | An authenticated trial target was visible in BAS. Service plans, entitlements, and task-specific deployment were not checked. No secrets or credentials are recorded here. |
-| CF-DEPLOY-001 | Build/deploy this MTA and verify cloud runtime | NOT RUN | No task-specific MTAR, application/service creation, route, role assignment, deployed URL, or cloud smoke test exists. |
-| EMP-PROVISION-001 | Provision real cloud Employee identity mappings | BLOCKED | The service exposes employee mappings read-only; no production mapping was provisioned. Follow the trusted provisioning prerequisite in [deployment.md](../deployment.md). |
-| REVIEW-001 | Final independent review and retest | NOT RUN | An initial independent review identified issues that were repaired. The reviewer has not completed a post-repair audit. |
-| SUBMIT-001 | Permanent assessment submission | NOT PERFORMED | Assessment submission remains under the user’s control. |
-
-## Screenshot and log inventory
-
-The `docs/evidence/` directory contains the authentic local browser screenshots, successful backend/compile/build logs, startup and database initialization output, and the final axe JSON result. Earlier failed startup and UI-render diagnostics are retained with filenames that identify them as initial failures. `db.sqlite`, `gen/`, and browser session credentials are excluded from Git.
+| SRC-001 | Current source repair | PASS | Commit f7d5c44; adds shared srv/date-rules.js and avoids loading development seed code in production. |
+| CAP-001 | CAP model/service compilation | PASS | [Current compile log](../evidence/2026-10-01-compile.log) and [root lifecycle suite](../evidence/2026-10-01-backend-tests.log). |
+| TEST-001 | Root CAP lifecycle integration suite | PASS — see current run log | [Backend test output](../evidence/2026-10-01-backend-tests.log). This is the root Mocha suite; it is separate from the independent harness. |
+| SECURITY-001 | Independent adversarial backend review | PASS — 19 passing | [Independent report](../evidence/independent-review-2026-10-01.md), [after-repair run](../evidence/audit-security-after-repair.log), and [current-source final rerun](../evidence/audit-security-final-2026-10-01.log). |
+| ROUTER-001 | Approuter runtime/security regressions | PASS — five on Node 22 and five on Node 24 | [Independent review](../evidence/independent-review-2026-10-01.md), [Node 22 result](../evidence/audit-router-node22-tests.log), [Node 24 result](../evidence/audit-router-startup-tests.log). Three moderate decoder aggregate advisories remain documented; no high/critical audit finding remains. |
+| SCALE-001 | 1,200-asset OData paging, search/filter, and identity scoping | PASS — six checks | [Machine-readable report](../evidence/scale-persistence-2026-10-01.json) and [HTTP/process log](../evidence/scale-persistence-2026-10-01.log): 24 ordered pages of 50 with no duplicate IDs; combined Hardware/Available/name search returned 200; Alex’s scoped set returned 200; foreign-key and widened-filter checks did not reveal another employee’s data. Only the workstation-specific temporary-directory prefix was redacted from the log. |
+| PERSIST-001 | SQLite allocation/return across full CAP restarts | PASS | Same scale report/log: one allocation/history row survived a server restart; return, cleared assignment, and closed prior history survived a second restart. The disposable SQLite fixture was removed. This is not HANA persistence evidence. |
+| BUILD-001 | CAP production build and UI package | PASS | [Current CAP build log](../evidence/2026-10-01-build.log), [UI copy log](../evidence/2026-10-01-copy-ui.log), and [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md). The repaired-source BAS MTA build is described separately from the failed CF deployment. |
+| BAS-001 | Use BAS with the current source | PASS | [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md) and the authentic earlier BAS build/runtime captures below. Source commit f7d5c44 was built and run in the SAP Build/BAS workspace. Raw BAS db/runtime logs remained in the remote workspace and were not copied; this lead-authored note is not a verbatim terminal transcript. |
+| BAS-UI-001 | Current BAS preview and role-based UI smoke | PASS for the exercised views | [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md). The live preview connected to CAP and showed Admin inventory/search, Employee own-assets/detail, and Compliance Manager alerts. The current preview images were displayed during execution but were not saved as repository images; checked-in UI screenshots are separately identified historical browser evidence. |
+| UI-ADMIN-001 | Local browser registration, allocation, return, history, and renewal | PASS for exercised paths | [Allocation/history](../evidence/ui-admin-allocation-history.png), [return](../evidence/ui-admin-returned-history.png), [persisted detail](../evidence/ui-admin-persisted-detail.png), and [renewal](../evidence/ui-admin-renewal.png). Full UI editing, maintenance, and retirement remain unverified. |
+| UI-EMP-001 | Employee My Assets and own-only detail | PASS for exercised path | [Earlier local browser screenshot](../evidence/ui-employee-my-assets.png) plus the current-date BAS view recorded in the BAS notes. Allocation history is intentionally restricted to IT Admins. |
+| UI-COMP-001 | Compliance Manager alerts | PASS for exercised view | [Earlier local browser screenshot](../evidence/ui-compliance-alerts-final.png) and current BAS observation. The current business date was 2026-10-01 Asia/Kolkata: one expired software license, three expiring licenses (including expiry-today and day-30), one hardware warranty alert, and eleven available idle assets. Hardware is visibly separated from software. |
+| UI-A11Y-001 | Automated accessibility audit | PASS — scoped audit only | [Axe result](../evidence/ui-a11y-audit.json) reports zero violations on the tested Compliance page. This does not complete manual keyboard/focus review or every loading/error/permission state. |
+| UI-PAGE-001 | Search/filter/paging at scale | PASS for CAP HTTP and current UI search; browser paging not exercised | [Scale result](../evidence/scale-persistence-2026-10-01.json) verifies server-side OData ordering, filtering, and paging. Current BAS UI search returned the matching single asset. The UI was not loaded with 1,200 rows to capture page-button behavior. |
+| ENV-CF-001 | Authenticated Cloud Foundry target and plans | PASS — target/config inspection | The target API, org/space, HANA instance, hana/hdi-shared and xsuaa/application plans, and task service instances were observed from BAS. See the [deployment guide](../deployment.md). This does not prove the application is deployed. |
+| CF-DEPLOY-001 | Actual MTA deployment after package repair | FAIL — timed out before operation registration | [Cloud deployment attempt record](../evidence/cloud-deploy-attempt-2026-10-01.md). The earlier operation failed on the fixed missing seed import; after f7d5c44, a fresh deploy client timed out after 300 seconds at archive deployment. The task apps remain stopped, and no cloud URL, role assignment, HANA workflow, or cloud smoke test is claimed. |
+| PROMPT-LOG-001 | Authentic Build Code prompt record | PASS | [Prompt log](build-code-prompt-log.md) records the exact read-only prompt and the no-response outcome, and labels the proposed implementation prompt as not executed. |
+| BUILD-CODE-001 | Actual Build Code/Joule code generation | BLOCKED | [Prompt log](build-code-prompt-log.md) records that no generated implementation, changed files, correction, or code-generation validation exists. |
+| SUBMIT-001 | Permanent assessment submission | NOT PERFORMED | Assessment submission remains under the user's control. |
 
 ## Remaining acceptance gaps
 
-- Build Code has not returned a result, and no code generation was completed there.
-- This solution was not implemented or run in BAS.
-- Cloud Foundry service-plan availability, MTA packaging for the latest UI source, deployment, role setup, and cloud execution remain unchecked.
-- UI retirement/maintenance and broad search/filter/paging at inventory scale remain untested.
-- A final independent review, updated complete acceptance matrix, and full-document consistency review remain outstanding.
+- Build Code still needs an enabled Joule/code-generation session and an actual generated result with prompt/output evidence.
+- Cloud Foundry deployment attempts timed out after the package repair before a new MTA operation registered. The exact attempt is recorded in [Cloud deployment attempt](../evidence/cloud-deploy-attempt-2026-10-01.md). Role collections, trusted Employee provisioning, HANA reads/writes, and deployed UI smoke remain unrun.
+- IT Admin UI editing, maintenance, and retirement actions were not exercised in the browser. The complete manual keyboard/focus and UI error/loading-state review also remains unrun.
+- Current BAS screenshots were displayed during the live session but were not persisted to a repository image; the checked-in UI screenshots are authentic earlier localhost evidence.
+- Compliance aggregation remains linear in retained assets/history; the 1,200-asset API scale check is finite evidence, not a HANA-scale result. The UI5 bootstrap is also unpinned to a specific CDN runtime, and complete manual accessibility review remains open.
+- These gaps prevent an assessment-readiness claim.
 
-Local passes above do not establish BAS use, Build Code generation, cloud deployment, hidden evaluator results, or assessment readiness.
+## Official SAP guidance
 
-## Official SAP guidance consulted
-
-- [CAP SQLite database guide](https://cap.cloud.sap/docs/guides/databases/sqlite) for file-backed local schema initialization and deployment behavior.
-- [SAPUI5 accessibility guide: landmark roles](https://ui5.sap.com/test-resources/sap/m/demokit/accessibilityGuide/webapp/topics/overview/applicationDeveloper/landmark.html) for page landmark configuration.
-
-The broader version-specific Cloud Foundry, HANA, and authentication documentation review remains outstanding.
+Version-sensitive CAP, HANA, authentication, Cloud Foundry, BAS, Build Code, and SAPUI5 references are indexed in [Official SAP Sources](official-sap-sources.md). Build commands and target configuration are also linked from the [Deployment Guide](../deployment.md).

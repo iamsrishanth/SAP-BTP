@@ -1,0 +1,47 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 build
+> cds build --production
+
+building project with {
+  versions: { cds: '10.1.1', compiler: '7.1.1', dk: '10.1.0' },
+  target: 'gen',
+  tasks: [
+    { src: 'db', for: 'hana', options: { model: [ 'db', 'srv', 'app', 'app/*', '@sap/cds/srv/outbox' ] } },
+    { src: 'srv', for: 'nodejs', options: { model: [ 'db', 'srv', 'app', 'app/*', '@sap/cds/srv/outbox' ] } }
+  ]
+}
+done > wrote output to:
+   gen\db\package.json
+   gen\db\seed.js
+   gen\db\src\gen\.hdiconfig
+   gen\db\src\gen\.hdinamespace
+   gen\db\src\gen\AssetManagementService.AllocationHistories.hdbview
+   gen\db\src\gen\AssetManagementService.Assets.hdbview
+   gen\db\src\gen\AssetManagementService.Employees.hdbview
+   gen\db\src\gen\AssetManagementService.MyAssets.hdbview
+   gen\db\src\gen\cds.outbox.Messages.hdbtable
+   gen\db\src\gen\it.asset.lifecycle.AllocationHistory.hdbtable
+   gen\db\src\gen\it.asset.lifecycle.Asset.hdbtable
+   gen\db\src\gen\it.asset.lifecycle.Employee.hdbtable
+   gen\db\undeploy.json
+   gen\srv\package-lock.json
+   gen\srv\package.json
+   gen\srv\srv\_i18n\i18n.json
+   gen\srv\srv\_i18n\messages.properties
+   gen\srv\srv\_i18n\messages_ar.properties
+   gen\srv\srv\_i18n\messages_bg.properties
+   gen\srv\srv\_i18n\messages_cs.properties
+   gen\srv\srv\_i18n\messages_da.properties
+   gen\srv\srv\_i18n\messages_de.properties
+   gen\srv\srv\_i18n\messages_el.properties
+   gen\srv\srv\_i18n\messages_en.properties
+   gen\srv\srv\_i18n\messages_en_US_saptrc.properties
+   gen\srv\srv\_i18n\messages_es.properties
+   gen\srv\srv\_i18n\messages_es_MX.properties
+   gen\srv\srv\_i18n\messages_fi.properties
+   gen\srv\srv\_i18n\messages_fr.properties
+   gen\srv\srv\_i18n\messages_he.properties
+   ... 27 more. Run with DEBUG=build to show all files.
+
+build completed in 11516 ms
+Verified on 2026-10-01 Asia/Kolkata; process exit code 0.

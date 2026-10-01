@@ -1,0 +1,24 @@
+
+> test
+> node --test test/*.test.js
+
+#2.0#2026 10 01 00:32:48:866#+05:30#WARNING#/LoggingLibrary################PLAIN##Dynamic log level switching not available#
+#2.0#2026 10 01 00:32:49:389#+05:30#INFO#/approuter#####muoh35t9##########muoh35t9#PLAIN##Application router version 23.0.0#
+#2.0#2026 10 01 00:32:49:394#+05:30#INFO#/Configuration#####muoh35te##########muoh35te#PLAIN##No COOKIES environment variable#
+#2.0#2026 10 01 00:32:49:401#+05:30#WARNING#/Configuration#####muoh35tl##########muoh35tl#PLAIN##No authentication will be used when accessing backends. Scopes defined in routes will be ignored.#
+#2.0#2026 10 01 00:32:49:402#+05:30#INFO#/Configuration#####muoh35tl##########muoh35tl#PLAIN##xs-app.json: Application does not have directory for static resources!#
+#2.0#2026 10 01 00:32:49:403#+05:30#INFO#/Configuration#####muoh35tl##########muoh35tl#PLAIN##Replacing $XSAPPNAME will not take place - 'xsappname' property not found in UAA configuration.#
+#2.0#2026 10 01 00:32:49:411#+05:30#INFO#/approuter#####muoh35t9##########muoh35t9#PLAIN##Application router is listening on port: 50666#
+✔ actual router starts and forwards valid OData, UTF-8 and duplicate query values (79.971ms)
+✔ real sap_idp query rewriting remains compatible with the current CommonJS parser (7.5488ms)
+✔ malformed UTF-8 and incomplete percent escapes are rejected before tolerant query rewriting (6.7399ms)
+✔ long request URLs fail before query parsing and a subsequent valid request succeeds (6.323ms)
+✔ patched same-major axios and moment retain the router dependency APIs (9.8221ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 5
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 874.586

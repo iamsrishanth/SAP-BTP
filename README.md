@@ -4,7 +4,7 @@ SAP CAP (Node.js) and SAPUI5 capstone for registering, allocating, returning, re
 
 ## Local setup and run
 
-Prerequisites: Node.js 22 or newer and npm. The checked-in lock file is intended for reproducible dependency installation.
+Use Node.js **24.x** and npm for the reproducible local and deployment build. The root package permits Node >=22, while the generated HDI deployer requires Node ^24; Node 24 satisfies all current module ranges. The checked-in root and approuter lock files support reproducible dependency installation.
 
 ~~~powershell
 npm ci
@@ -14,7 +14,9 @@ npm run watch
 
 Open the UI at `http://localhost:4004/` while the CAP server is running. CAP also exposes the OData V4 service at `/odata/v4/asset-management/`; its metadata is at `/odata/v4/asset-management/$metadata`.
 
-Development uses file-backed SQLite (`db.sqlite`) so successful changes can persist across browser refreshes and server restarts. CAP requires `npm run db:deploy` to create or update this persistent database schema before starting the server; the `watch` command does not deploy a persistent SQLite schema automatically. Demo records are seeded only into an empty local development database after the schema exists. Delete the local database file only when you intend to reset that demo database. Production configuration selects SAP HANA through `@cap-js/hana`; local mock authentication must not be used as cloud authentication.
+Development uses file-backed SQLite (`db.sqlite`). Stop the development server before schema maintenance. `npm run db:deploy` first runs the local [history-association migration](scripts/migrate-history-association.js), then CAP deploy with automatic schema evolution. The migration preserves the old `asset_assetID` values by renaming the column to `assetID_assetID`, creates a consistent SQLite backup under ignored `db-backups/`, checks the persisted columns against the current model, and establishes the schema baseline. It refuses ambiguous/incomplete schemas. A fresh database has no legacy column to migrate. Do not replace or delete an existing database to apply the contract update.
+
+Demo records are seeded only into an empty non-production inventory after schema initialization. Their dates are relative to the business date at the first seed; later starts preserve them and do not re-date the inventory. Use the [controlled demonstration procedure](docs/assessment/demonstration-script.md) for repeatable boundary examples. Production selects SAP HANA through `@cap-js/hana`; cloud authentication uses XSUAA. Local SQLite contents and mock identities are not copied to HANA.
 
 ## Demo users
 
@@ -27,7 +29,7 @@ These mock users are for local development and tests only. Use the `username` an
 | `employee.jamie` | `demo-employee` | Employee | Jamie's assigned assets only |
 | `compliance.manager` | `demo-compliance` | ComplianceManager | Compliance and idle-asset alerts |
 
-The credentials are disposable local assessment fixtures; do not reuse them in a deployed environment. Cloud deployment is configured for XSUAA and requires role-template/role-collection mapping and an immutable user-subject-to-employee mapping.
+The credentials are disposable local assessment fixtures; do not reuse them in a deployed environment. Cloud deployment is configured for XSUAA and requires role-template/role-collection mapping and a trusted authenticated-user-to-employee mapping. IT Admin uses the controlled `provisionEmployee(userId, displayName)` action to create an active mapping from an actually verified `sessionInfo().userId`. It preserves case, rejects duplicate/invalid/control-character values, records the administrator in managed audit fields, and grants no identity-provider credentials or BTP roles. Generic Employee writes remain disabled.
 
 ## Configuration and behavior
 
@@ -43,23 +45,28 @@ Expiry today is still valid and appears in “expiring soon”; expiry before to
 
 ~~~powershell
 npm run compile
-npm run build
 npm test
+npm run build
+npm run copy:ui
 ~~~
 
-`npm test` runs the CAP HTTP integration suite against the documented local mock roles and a fixed reference date. Review the generated evidence files for the actual run result; these commands do not prove BAS, Build Code, or Cloud Foundry deployment use.
+`npm test` starts isolated in-memory SQLite with a fixed 2026-09-28 reference date and includes disposable migration fixtures; it does not reset `db.sqlite`. The current [root CAP test log](docs/evidence/2026-10-01-backend-tests.log) records **19 passing** tests. The independent adversarial review has a separate [review record](docs/evidence/independent-review-2026-10-01.md) and harness output; these are separate checks.
+
+`npm run build` generates the CAP production modules. `npm run copy:ui` copies the actual SAPUI5 source into `gen/srv/app` for MTA packaging; rerun both after source changes. The approuter has its own locked dependencies and `npm test --prefix .deploy/app-router` verification script. Test/build command availability does not prove a run or deployment.
 
 ## Architecture and lifecycle
 
-- `db/schema.cds` defines required `Asset` and `AllocationHistory` entities and the genuine `AllocationHistory.asset` association. CAP exposes the generated foreign-key property as `asset_assetID`.
+- `db/schema.cds` defines required `Asset` and `AllocationHistory` entities and the genuine required `AllocationHistory.assetID` association. CAP exposes its generated foreign-key property as `assetID_assetID`.
 - `srv/asset-management-service.cds` exposes the service contract and role restrictions; `srv/asset-management-service.js` implements validation and lifecycle operations.
 - `app/` is the SAPUI5 application served with the CAP service.
-- `db/seed.js` provides relative-date demo data, so expiring/expired/idle examples remain useful as the current date changes.
+- `db/seed.js` provides relative-date first-run demo data; existing persisted seed dates remain unchanged on later runs.
 - `mta.yaml` and `xs-security.json` describe the Cloud Foundry/HANA/XSUAA deployment path when available.
 
 The exact assumptions, field additions, transitions, authorization rules, and service operations are documented in [Assumptions and Data Model](docs/assessment/assumptions-and-data-model.md) and [Service Definition](docs/assessment/service-definition.md).
 
 ## Submission documents and evidence
+
+Start with the [full submission index](docs/assessment/submission-index.md) and [three-role demonstration script](docs/assessment/demonstration-script.md).
 
 | Deliverable | File |
 |---|---|
@@ -72,5 +79,15 @@ The exact assumptions, field additions, transitions, authorization rules, and se
 | Cloud Foundry Deployment Steps | [Deployment Guide](docs/deployment.md) |
 | Build Code Prompt Log | [Build Code Prompt Log](docs/assessment/build-code-prompt-log.md) |
 | Execution Evidence Index | [Execution Evidence](docs/assessment/execution-evidence.md) |
+| Official SAP Documentation | [Source index](docs/assessment/official-sap-sources.md) |
+| Document Consistency Review | [Review and resolutions](docs/assessment/document-consistency-review.md) |
 
-Evidence and status are reported in the matrix and evidence index. Local test success does not establish cloud deployment or assessment submission. The assessment portal remains under the user's control.
+## SAP environment and deployment status
+
+On 2026-10-01 the lead created the `ITAssetLifecycle` Full-Stack Node.js project from this Git repository in the SAP Build lobby and cloned source revision `f7d5c44` to `/home/user/projects/SAP-BTP` in the BAS devspace `ws-ue4j9`. In BAS, the repaired source compiled and built, the MTA archive was created, SQLite schema deployment succeeded with the history migration, and CAP started on port 4004. The live BAS preview was exercised for IT Admin inventory/search, Employee own-assets/detail, and Compliance Manager alerts. The current observations and screenshot limitations are in [BAS verification notes](docs/evidence/bas-environment-verification-2026-10-01.md); earlier terminal and inventory screenshots are indexed in [Execution Evidence](docs/assessment/execution-evidence.md).
+
+The BAS preview observed by the lead is [the devspace port 4004 preview](https://port4004-workspaces-ws-ue4j9.us10.trial.applicationstudio.cloud.sap/); it requires the authorized BAS session and running development server. It is not a deployed Cloud Foundry app route.
+
+Build Code/Joule code generation remains blocked; the prompt log records the actual read-only prompt and the no-result outcome. The Cloud Foundry deployment was attempted after the packaging repair but timed out before a new MTA operation registered; see the [deployment attempt record](docs/evidence/cloud-deploy-attempt-2026-10-01.md). Cloud role assignment, trusted production Employee provisioning, HANA workflows, and deployed runtime smoke tests remain unverified. BAS preview, local SQLite, and Cloud Foundry status are tracked separately in the [requirement matrix](docs/assessment/requirement-evidence-matrix.csv).
+
+Evidence and status are reported in the matrix and evidence index. The assessment portal and permanent submission remain under the user's control.

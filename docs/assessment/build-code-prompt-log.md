@@ -2,17 +2,17 @@
 
 ## Evidence status
 
-**Status: IN PROGRESS — an authenticated SAP Build Code/Joule workspace is available.** On 2026-09-28 the lead inspected the user's SAP Build lobby and BAS workspace and submitted one read-only Joule Code Search prompt. The prompt remains visibly in a `Thinking...` state at the latest check; no search result has been retrieved and no generated code or changed files are evidenced yet. Build Code use is therefore initiated but the required code generation/implementation contribution is still unverified.
+**Status: BLOCKED for code generation.** On 2026-09-28 the lead inspected the user's SAP Build lobby and BAS workspace and submitted one read-only Joule Code Search prompt. It remained visibly in a `Thinking...` state and returned no search result, generated code, or changed files. On 2026-10-01 the BAS side chat showed `Select a Model` and `Use GitHub Credentials` setup choices with no model configured for code generation. SAP Build lobby project creation and BAS execution were completed and are recorded separately; they do not satisfy the Build Code generation requirement.
 
 The Build Code usage requirement remains unverified. This log separates actual execution evidence from prompt text prepared for a future authorized session. A locally stored proposed prompt is not evidence that Build Code was used.
 
 ## Actual prompt executions
 
-The following row records the prompt exactly as submitted. Because Joule has not returned, output, changed files, corrections, and validation are recorded as pending rather than inferred.
+The following row records the prompt exactly as submitted. Joule returned no result; that outcome is recorded directly rather than inferred.
 
 | Sequence | Date/time | Purpose | Exact prompt actually submitted | Generated result | Files/features affected | Corrections after generation | Validation performed | Status |
 |---|---|---|---|---|---|---|---|---|
-| BC-01 | 2026-09-28 | Read-only discovery of the existing AssetMaintenance workspace and missing IT asset lifecycle requirements | `/code-search Search the current AssetMaintenance workspace for its CDS entities, service definition, handler/action files, authorization configuration, UI5 app paths, and local/build/deployment scripts. Summarize actual file names, service paths and actions, then list the required IT asset lifecycle fields, roles, and workflows that are missing. Do not edit files or generate code.` | Pending; Joule displayed `Thinking...` at the latest inspection; no result captured | None observed; prompt explicitly requested read-only search | Pending; no generated code to correct | Search result not yet returned; no code validation applicable | SUBMITTED / RESULT PENDING |
+| BC-01 | 2026-09-28 | Read-only discovery of the existing AssetMaintenance workspace and missing IT asset lifecycle requirements | `/code-search Search the current AssetMaintenance workspace for its CDS entities, service definition, handler/action files, authorization configuration, UI5 app paths, and local/build/deployment scripts. Summarize actual file names, service paths and actions, then list the required IT asset lifecycle fields, roles, and workflows that are missing. Do not edit files or generate code.` | No response was returned; the last visible prompt state was `Thinking...` | None observed; prompt explicitly requested read-only search | Not applicable; no generated code to correct | No Build Code result or code validation is available | SUBMITTED; RESULT UNAVAILABLE; CODE GENERATION BLOCKED |
 
 ## Proposed prompts — prepared only, not executed
 
@@ -49,4 +49,4 @@ If Build Code produces no changes or an error, record that outcome as-is. Do not
 
 ## BAS relationship
 
-This file logs Build Code prompts only. The user-provided authenticated SAP Build lobby showed an existing `AssetMaintenance` full-stack Node.js project. Its BAS workspace was opened and inspected, including the project map, handler source, package configuration, and terminal history; the historical terminal output is not represented as a command run by this task. Task-specific BAS implementation/build/run evidence remains pending and must be captured separately. Local CAP/UI5 work is not BAS evidence.
+This file logs Build Code prompts only. The SAP Build lobby and task-specific BAS contribution are recorded in [BAS environment verification](../evidence/bas-environment-verification-2026-10-01.md). BC-01 is the only actual prompt execution; proposed prompt P-01 below has not been submitted. No Build Code-generated implementation is claimed.

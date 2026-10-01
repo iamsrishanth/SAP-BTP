@@ -1,0 +1,31 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 test
+> mocha --timeout 30000 "test/**/*.test.js"
+
+
+
+  Asset Management CAP service
+    √ reports authenticated principal IDs and restricts each role at the API boundary (181ms)
+    √ enforces employee identity server-side even when a client submits a broader filter
+    √ preserves employee key predicates, selected fields and accurate scoped counts
+    √ provisions exact trusted subject mappings with authenticated administrator auditing
+    √ rejects invalid, duplicate and non-admin employee provisioning without mutable mappings
+    √ allows one concurrent mapping insert without duplicate or overwritten identity records
+    √ registers, reads, edits, and safely deletes only an unassigned asset without history
+    √ rejects invalid registration fields, types, dates, and missing software expiry
+    √ rejects absent names, absent purchase dates and invalid calendar dates without creating rows
+    √ rejects nonexistent lifecycle UUIDs, missing arguments and inactive or unknown assignees
+    √ allocates atomically, records the trusted employee, returns once, and preserves history (47ms)
+    √ allows only one of two concurrent allocation requests to commit
+    √ rejects missing, duplicate and mismatched active return histories without partial updates (64ms)
+    √ renews only software, updates compliance immediately, and leaves allocation status separate
+    √ distinguishes expired, expiring, warranty, missing-date, and idle boundary cases
+    √ blocks retirement of allocated assets, preserves history, and forbids allocation after retirement
+    √ applies controlled maintenance transitions and denies generic history manipulation
+    √ never enables demo runtime seeding in a production environment or profile (219ms)
+    √ migrates the required history association idempotently while preserving rows and a backup (145ms)
+
+
+  19 passing (2s)
+
+Verified on 2026-10-01 Asia/Kolkata; process exit code 0.

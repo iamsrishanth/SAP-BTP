@@ -1,0 +1,127 @@
+{
+  "status": "PASS",
+  "businessDate": "2026-10-01",
+  "timeZone": "Asia/Kolkata",
+  "node": "v24.16.0",
+  "fixtureAssets": 1200,
+  "processes": [
+    {
+      "pid": 19336,
+      "initialSeed": true,
+      "ready": true,
+      "closed": true,
+      "port": 64450,
+      "databasePath": "C:\\Users\\bairi\\AppData\\Local\\Temp\\sap-asset-scale-QVmwek\\isolated.sqlite",
+      "fixture": {
+        "assets": 1200,
+        "activeHistories": 400,
+        "alexAssigned": 200,
+        "jamieAssigned": 200,
+        "foreignAssetID": "9131b2fc-fe22-4656-8adb-a23ec967a8d1"
+      },
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 13584,
+      "initialSeed": false,
+      "ready": true,
+      "closed": true,
+      "port": 64460,
+      "databasePath": "C:\\Users\\bairi\\AppData\\Local\\Temp\\sap-asset-scale-QVmwek\\isolated.sqlite",
+      "fixture": null,
+      "exitCode": 0,
+      "signal": null
+    },
+    {
+      "pid": 8344,
+      "initialSeed": false,
+      "ready": true,
+      "closed": true,
+      "port": 64465,
+      "databasePath": "C:\\Users\\bairi\\AppData\\Local\\Temp\\sap-asset-scale-QVmwek\\isolated.sqlite",
+      "fixture": null,
+      "exitCode": 0,
+      "signal": null
+    }
+  ],
+  "checks": [
+    {
+      "name": "inventory paging at scale",
+      "status": "PASS",
+      "entity": "Assets",
+      "user": "admin",
+      "pageSize": 50,
+      "pageCount": 24,
+      "count": 1200,
+      "uniqueAssets": 1200,
+      "duplicateAssets": 0,
+      "terminalPageEmpty": true,
+      "idSetSHA256": "6a4faf4c0a47415928f2a1058f740481fe18b609648e0e5e8f7dac47abd65c11"
+    },
+    {
+      "name": "combined search/type/status filtering",
+      "status": "PASS",
+      "entity": "Assets",
+      "user": "admin",
+      "pageSize": 50,
+      "pageCount": 4,
+      "count": 200,
+      "uniqueAssets": 200,
+      "duplicateAssets": 0,
+      "terminalPageEmpty": true,
+      "idSetSHA256": "87859baa8f9847870c718b2a2a135eeb8bf8528ce3e27832568985f2ac8c0ab2"
+    },
+    {
+      "name": "employee scoped paging at scale",
+      "status": "PASS",
+      "entity": "MyAssets",
+      "user": "alex",
+      "pageSize": 50,
+      "pageCount": 4,
+      "count": 200,
+      "uniqueAssets": 200,
+      "duplicateAssets": 0,
+      "terminalPageEmpty": true,
+      "idSetSHA256": "2a9462eee81564aec6b0e06f614f5336daf16500dfb7b84ca5d1b3cab43dc48a"
+    },
+    {
+      "name": "identity widening and foreign key denied at scale",
+      "status": "PASS",
+      "widenedCount": 0,
+      "foreignKeyStatus": 404,
+      "inventoryStatus": 403
+    },
+    {
+      "name": "allocation and history persist after full process restart",
+      "status": "PASS",
+      "assetID": "ecbeeb19-d83a-41a6-a226-f0e4627858ec",
+      "allocID": "456709c2-46e0-496a-b3d5-2999c55ca1bc",
+      "allocatedToUserId": "employee.alex",
+      "assignedDate": "2026-10-01",
+      "historyRows": 1,
+      "inventoryCount": 1201,
+      "employeeCount": 201
+    },
+    {
+      "name": "return and immutable prior history persist after another full restart",
+      "status": "PASS",
+      "assetID": "ecbeeb19-d83a-41a6-a226-f0e4627858ec",
+      "allocID": "456709c2-46e0-496a-b3d5-2999c55ca1bc",
+      "statusAfterRestart": "Available",
+      "returnedDate": "2026-10-01",
+      "formerEmployeeReadStatus": 404
+    }
+  ],
+  "limitations": [
+    "Backend HTTP paging verified; browser pagination not exercised.",
+    "SQLite process persistence verified; cloud HANA persistence and authentication not exercised."
+  ],
+  "sqliteAfterAllocation": {
+    "bytes": 516096,
+    "sha256": "8d70fafacb1ebd74692dfc3bf58d4dcd9899fb82cfb80b8750bf11890957204b"
+  },
+  "fixtureRemoved": true,
+  "durationMilliseconds": 4090,
+  "recordedAtUTC": "2026-09-30T19:24:51.566Z"
+}

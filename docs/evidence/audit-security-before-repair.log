@@ -1,0 +1,75 @@
+
+
+  Independent adversarial security and lifecycle audit
+    √ employee single key read returns the exact requested own asset
+    1) employee foreign key and unknown key read return 404
+    2) employee count and paged count remain scoped and accurate
+    √ employee cannot navigate or expand into inventory/history private data
+    √ all employee and compliance writes are rejected (47ms)
+    √ missing resource PUT/PATCH cannot create incomplete inventory or history
+    √ invalid calendar dates and unknown identifiers fail without mutation
+    √ missing required registration fields and missing action arguments reject clearly
+    √ all lifecycle actions reject nonexistent UUID and unknown/inactive assignees
+    √ invalid and absent authentication receive 401
+    √ six simultaneous allocations produce one committed active history
+    3) return rejects a mismatched active history identity and leaves data unchanged
+    √ return with missing or duplicated active history rejects with no partial changes
+
+
+  10 passing (961ms)
+  3 failing
+
+  1) Independent adversarial security and lifecycle audit
+       employee foreign key and unknown key read return 404:
+
+      AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
++ actual - expected
+
+  [
++   200,
++   200
+-   404,
+-   404
+  ]
+
+      + expected - actual
+
+       [
+      -  200
+      -  200
+      +  404
+      +  404
+       ]
+
+      at Context.<anonymous> (docs\evidence\audit-security.test.js:47:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+  2) Independent adversarial security and lifecycle audit
+       employee count and paged count remain scoped and accurate:
+
+      AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+0 !== 1
+
+      + expected - actual
+
+      -0
+      +1
+
+      at Context.<anonymous> (docs\evidence\audit-security.test.js:56:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+
+  3) Independent adversarial security and lifecycle audit
+       return rejects a mismatched active history identity and leaves data unchanged:
+
+      AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+
+200 !== 409
+
+      + expected - actual
+
+      -200
+      +409
+
+      at Context.<anonymous> (docs\evidence\audit-security.test.js:154:12)
+      at process.processTicksAndRejections (node:internal/process/task_queues:104:5)

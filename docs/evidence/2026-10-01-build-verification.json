@@ -1,0 +1,264 @@
+{
+  "recordDate": "2026-10-01",
+  "businessTimeZone": "Asia/Kolkata",
+  "recordedAtUTC": "2026-09-30T18:44:58.9696309Z",
+  "project": "C:\\Code\\SAP\\SAP-BTP",
+  "environment": {
+    "node": "v24.16.0",
+    "@sap/cds": "10.1.1",
+    "@sap/cds-dk": "10.1.0",
+    "@sap/cds-compiler": "7.1.1",
+    "@cap-js/hana": "3.1.1",
+    "@cap-js/sqlite": "3.1.1",
+    "mocha": "12.0.2"
+  },
+  "commands": [
+    {
+      "command": "npm run compile",
+      "exitCode": 0,
+      "status": "PASS",
+      "log": "docs/evidence/2026-10-01-compile.log"
+    },
+    {
+      "command": "npm test",
+      "exitCode": 0,
+      "status": "PASS",
+      "passingTests": 10,
+      "elapsed": "13s",
+      "database": "isolated in-memory SQLite",
+      "referenceDate": "2026-09-28",
+      "log": "docs/evidence/2026-10-01-backend-tests.log"
+    },
+    {
+      "command": "npm run build -- production",
+      "exitCode": 1,
+      "status": "FAIL",
+      "reason": "package build script already uses --production; trailing production is treated as a project folder",
+      "log": "docs/evidence/2026-10-01-build.log"
+    },
+    {
+      "command": "npm run build",
+      "exitCode": 0,
+      "status": "PASS",
+      "productionFlag": "--production supplied by package script",
+      "elapsedMilliseconds": 13735,
+      "log": "docs/evidence/2026-10-01-build.log"
+    },
+    {
+      "command": "npm run copy:ui",
+      "exitCode": 0,
+      "status": "PASS",
+      "log": "docs/evidence/2026-10-01-copy-ui.log"
+    }
+  ],
+  "productionProfile": {
+    "profiles": [
+      "production"
+    ],
+    "dbKind": "hana",
+    "dbImpl": "@cap-js/hana",
+    "authKind": "xsuaa"
+  },
+  "hanaDDL": {
+    "status": "PASS",
+    "verification": "Generated files inspected; no HANA execution or HDI deployment performed",
+    "assetPrimaryKey": "assetID NVARCHAR(36) NOT NULL",
+    "historyPrimaryKey": "allocID NVARCHAR(36) NOT NULL",
+    "associationForeignKey": "asset_assetID NVARCHAR(36) NOT NULL",
+    "dates": "purchaseDate/expiryDate/assignedDate/returnedDate generated as DATE",
+    "availabilityDefault": "'Available'",
+    "schemaArtifacts": [
+      {
+        "path": "gen/db/src/gen/it.asset.lifecycle.Asset.hdbtable",
+        "exists": true,
+        "sha256": "6B13141E32A66CDF95A943D47B99EE91C79D5B1304E6E27FFCD99DCFBA8B8098"
+      },
+      {
+        "path": "gen/db/src/gen/it.asset.lifecycle.AllocationHistory.hdbtable",
+        "exists": true,
+        "sha256": "4155139D9120A99581C6095F4AE67FD3182E165D66792CA00227D3B79B767DF0"
+      },
+      {
+        "path": "gen/db/src/gen/it.asset.lifecycle.Employee.hdbtable",
+        "exists": true,
+        "sha256": "2381C4AB9827AAB16DEE7D636D8623EE92293B2A3F8780FE924F9A5824C5F69F"
+      },
+      {
+        "path": "gen/db/src/gen/.hdiconfig",
+        "exists": true,
+        "sha256": "3C1A158DAEABBD38852E7E49FD82A3A548511D76F8BBC4A84D600B12AA6B922C"
+      },
+      {
+        "path": "gen/db/package.json",
+        "exists": true,
+        "sha256": "8BAA5203660E8D841F220AACB967445D5C452DA99A6F5E3E8606D24AE22F3540"
+      },
+      {
+        "path": "gen/srv/package.json",
+        "exists": true,
+        "sha256": "F1B5863362AE915F7107794408DEF562E626CD68D78D6F4B8EB6489EE817EFC7"
+      },
+      {
+        "path": "gen/srv/package-lock.json",
+        "exists": true,
+        "sha256": "6D2E7767DAED9036053E0FD340B31EBF25E871D0322E09B3624E525D2098A224"
+      },
+      {
+        "path": "gen/srv/srv/csn.json",
+        "exists": true,
+        "sha256": "1F0182FA4C8B7D14C3DDEEC8E901FD0D9776C8E62259FA543A608E6EBFC2B9CB"
+      },
+      {
+        "path": "gen/srv/srv/asset-management-service.js",
+        "exists": true,
+        "sha256": "0E77300E55152EC9F901314C799AEC87411555E5A5BFEE697292B5645F8B092F"
+      }
+    ]
+  },
+  "uiCopy": {
+    "status": "PASS",
+    "sourceFiles": 6,
+    "copiedFiles": 6,
+    "hashAlgorithm": "SHA256",
+    "files": [
+      {
+        "path": "Component.js",
+        "sourceSHA256": "C04BDAA0F7703E0686EE7CB15CA6157B36D53FE5BA5B9E2D89ACC67B8E39D456",
+        "copiedSHA256": "C04BDAA0F7703E0686EE7CB15CA6157B36D53FE5BA5B9E2D89ACC67B8E39D456",
+        "matches": true
+      },
+      {
+        "path": "index.html",
+        "sourceSHA256": "684FFB9AD5A14A3CFA9B07C27045D29FCEC897C4A5C821D28F8B7BAA4145683A",
+        "copiedSHA256": "684FFB9AD5A14A3CFA9B07C27045D29FCEC897C4A5C821D28F8B7BAA4145683A",
+        "matches": true
+      },
+      {
+        "path": "manifest.json",
+        "sourceSHA256": "CD594B85E1D3C8B5CFA8E2447474945AA419329FAA1E778F570760D9635A5FB7",
+        "copiedSHA256": "CD594B85E1D3C8B5CFA8E2447474945AA419329FAA1E778F570760D9635A5FB7",
+        "matches": true
+      },
+      {
+        "path": "controller/App.controller.js",
+        "sourceSHA256": "EA0ECCC7303642360284CF0D3EE92C15EDF371D8E47A1C356A4E3078D43573D9",
+        "copiedSHA256": "EA0ECCC7303642360284CF0D3EE92C15EDF371D8E47A1C356A4E3078D43573D9",
+        "matches": true
+      },
+      {
+        "path": "css/style.css",
+        "sourceSHA256": "70EF68EE49A684BBD0CC1DD6BA43ABC9AF47D541BABD186073C982710A9A74DA",
+        "copiedSHA256": "70EF68EE49A684BBD0CC1DD6BA43ABC9AF47D541BABD186073C982710A9A74DA",
+        "matches": true
+      },
+      {
+        "path": "view/App.view.xml",
+        "sourceSHA256": "D3EF3EAF02F891B55281E60BBE736BFD34D572DF98421277110560C20C940D60",
+        "copiedSHA256": "D3EF3EAF02F891B55281E60BBE736BFD34D572DF98421277110560C20C940D60",
+        "matches": true
+      }
+    ]
+  },
+  "inputSnapshot": [
+    {
+      "path": "package.json",
+      "sha256": "8629BEC272B5894F0147C528AF5D884330FC50491BBB40A417200869601DA80E"
+    },
+    {
+      "path": "package-lock.json",
+      "sha256": "6D2E7767DAED9036053E0FD340B31EBF25E871D0322E09B3624E525D2098A224"
+    },
+    {
+      "path": "mta.yaml",
+      "sha256": "F5C59F9A244173318F1B73128D60C6BBC8106F6FA1A81D4DF51FE946FCEEFE92"
+    },
+    {
+      "path": "xs-security.json",
+      "sha256": "F40670F75F650572EC76FA4D4D46E5F3ECF05F98A079CE3C692B03843C4B6D33"
+    },
+    {
+      "path": ".deploy/app-router/package.json",
+      "sha256": "A10EAF9801A39F73FD49DCA03B09FC3F2E8E0C7231E179050700CB70B3360E05"
+    },
+    {
+      "path": ".deploy/app-router/xs-app.json",
+      "sha256": "4FBE7ED8746F3F0820BFC92AF49C988C07A34BD7EC785396CD4E3CE71570AB95"
+    },
+    {
+      "path": "db/schema.cds",
+      "sha256": "A936611A8AC80FD19C2FB3EBFD7610350B3C2C714852D4A1D72104E57AC9F876"
+    },
+    {
+      "path": "srv/asset-management-service.cds",
+      "sha256": "EF074F2980065E13134511E9313D66EB8B5EA0CDB8535D4C47F611BC79BF0161"
+    },
+    {
+      "path": "srv/asset-management-service.js",
+      "sha256": "0E77300E55152EC9F901314C799AEC87411555E5A5BFEE697292B5645F8B092F"
+    },
+    {
+      "path": "test/asset-lifecycle.test.js",
+      "sha256": "D4A7576E102E9F4D00B2E9D99F6D7DF557451E67031C724F35623DDBFF315E4E"
+    },
+    {
+      "path": "scripts/copy-ui.js",
+      "sha256": "F5F6B9FC7369DE4F5F234B8AA9B0785785EAEF4944237B923995390D22819FFB"
+    }
+  ],
+  "deployment": {
+    "status": "BLOCKED",
+    "scope": "Local tooling and generated artifact verification",
+    "tools": [
+      {
+        "name": "cf",
+        "availableOnPATH": false,
+        "path": null
+      },
+      {
+        "name": "mbt",
+        "availableOnPATH": false,
+        "path": null
+      },
+      {
+        "name": "java",
+        "availableOnPATH": false,
+        "path": null
+      },
+      {
+        "name": "make",
+        "availableOnPATH": false,
+        "path": null
+      },
+      {
+        "name": "btp",
+        "availableOnPATH": false,
+        "path": null
+      },
+      {
+        "name": "ui5",
+        "availableOnPATH": false,
+        "path": null
+      },
+      {
+        "name": "cds",
+        "availableOnPATH": false,
+        "path": null
+      }
+    ],
+    "missing": "cf and mbt not found on PATH; no MTAR build, CF deployment, HANA runtime or XSUAA authentication exercised",
+    "mtaPaths": {
+      "service": "gen/srv",
+      "deployer": "gen/db",
+      "approuter": ".deploy/app-router",
+      "security": "xs-security.json"
+    },
+    "notes": [
+      "MTA before-all correctly uses npx cds build --production then npm run copy:ui.",
+      "Generated runtime package and package-lock.json present.",
+      "Production profile resolves database kind hana and authentication xsuaa.",
+      "HDI deployer generated package requires Node ^24; actual cloud buildpack support remains unverified.",
+      "Backend concurrency check ran on SQLite only; HANA concurrency remains unverified.",
+      "No npm ci was run, and the persisted local db/server were not accessed by these verification commands."
+    ]
+  }
+}

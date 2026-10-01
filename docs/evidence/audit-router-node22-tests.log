@@ -1,0 +1,47 @@
+TAP version 13
+# \#2.0\#2026 10 01 00:33:02:622\#+05:30\#WARNING\#/LoggingLibrary\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#\#PLAIN\#\#Dynamic log level switching not available\#
+# \#2.0\#2026 10 01 00:33:03:442\#+05:30\#INFO\#/approuter\#\#\#\#\#muoh3gnm\#\#\#\#\#\#\#\#\#\#muoh3gnm\#PLAIN\#\#Application router version 23.0.0\#
+# \#2.0\#2026 10 01 00:33:03:445\#+05:30\#INFO\#/Configuration\#\#\#\#\#muoh3gnp\#\#\#\#\#\#\#\#\#\#muoh3gnp\#PLAIN\#\#No COOKIES environment variable\#
+# \#2.0\#2026 10 01 00:33:03:450\#+05:30\#WARNING\#/Configuration\#\#\#\#\#muoh3gnu\#\#\#\#\#\#\#\#\#\#muoh3gnu\#PLAIN\#\#No authentication will be used when accessing backends. Scopes defined in routes will be ignored.\#
+# \#2.0\#2026 10 01 00:33:03:451\#+05:30\#INFO\#/Configuration\#\#\#\#\#muoh3gnu\#\#\#\#\#\#\#\#\#\#muoh3gnu\#PLAIN\#\#xs-app.json: Application does not have directory for static resources!\#
+# \#2.0\#2026 10 01 00:33:03:451\#+05:30\#INFO\#/Configuration\#\#\#\#\#muoh3gnu\#\#\#\#\#\#\#\#\#\#muoh3gnu\#PLAIN\#\#Replacing $XSAPPNAME will not take place - 'xsappname' property not found in UAA configuration.\#
+# \#2.0\#2026 10 01 00:33:03:456\#+05:30\#INFO\#/approuter\#\#\#\#\#muoh3gnm\#\#\#\#\#\#\#\#\#\#muoh3gnm\#PLAIN\#\#Application router is listening on port: 57484\#
+# Subtest: actual router starts and forwards valid OData, UTF-8 and duplicate query values
+ok 1 - actual router starts and forwards valid OData, UTF-8 and duplicate query values
+  ---
+  duration_ms: 69.8185
+  type: 'test'
+  ...
+# Subtest: real sap_idp query rewriting remains compatible with the current CommonJS parser
+ok 2 - real sap_idp query rewriting remains compatible with the current CommonJS parser
+  ---
+  duration_ms: 16.3614
+  type: 'test'
+  ...
+# Subtest: malformed UTF-8 and incomplete percent escapes are rejected before tolerant query rewriting
+ok 3 - malformed UTF-8 and incomplete percent escapes are rejected before tolerant query rewriting
+  ---
+  duration_ms: 7.1843
+  type: 'test'
+  ...
+# Subtest: long request URLs fail before query parsing and a subsequent valid request succeeds
+ok 4 - long request URLs fail before query parsing and a subsequent valid request succeeds
+  ---
+  duration_ms: 12.0482
+  type: 'test'
+  ...
+# Subtest: patched same-major axios and moment retain the router dependency APIs
+ok 5 - patched same-major axios and moment retain the router dependency APIs
+  ---
+  duration_ms: 8.9896
+  type: 'test'
+  ...
+1..5
+# tests 5
+# suites 0
+# pass 5
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1239.5689

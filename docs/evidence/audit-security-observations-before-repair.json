@@ -1,0 +1,387 @@
+[
+  {
+    "name": "own-key",
+    "status": 200,
+    "body": {
+      "@odata.context": "$metadata#MyAssets/$entity",
+      "assetID": "5e6e0a74-0380-41f7-9a6e-f4df408152d9",
+      "assetName": "DEMO-Allocated-Laptop-Alex",
+      "type": "Hardware",
+      "purchaseDate": "2026-05-04",
+      "expiryDate": "2027-05-04",
+      "status": "Allocated",
+      "allocatedTo": "Alex Morgan"
+    }
+  },
+  {
+    "name": "foreign-or-unknown-key:95e5ce57-7c96-452f-b7e1-1c88169c6a57",
+    "status": 200,
+    "body": {
+      "@odata.context": "$metadata#MyAssets/$entity",
+      "assetID": "5e6e0a74-0380-41f7-9a6e-f4df408152d9",
+      "assetName": "DEMO-Allocated-Laptop-Alex",
+      "type": "Hardware",
+      "purchaseDate": "2026-05-04",
+      "expiryDate": "2027-05-04",
+      "status": "Allocated",
+      "allocatedTo": "Alex Morgan"
+    }
+  },
+  {
+    "name": "foreign-or-unknown-key:00000000-0000-4000-8000-000000000001",
+    "status": 200,
+    "body": {
+      "@odata.context": "$metadata#MyAssets/$entity",
+      "assetID": "5e6e0a74-0380-41f7-9a6e-f4df408152d9",
+      "assetName": "DEMO-Allocated-Laptop-Alex",
+      "type": "Hardware",
+      "purchaseDate": "2026-05-04",
+      "expiryDate": "2027-05-04",
+      "status": "Allocated",
+      "allocatedTo": "Alex Morgan"
+    }
+  },
+  {
+    "name": "count",
+    "status": 200,
+    "body": 0
+  },
+  {
+    "name": "paged-count",
+    "status": 200,
+    "body": {
+      "@odata.context": "$metadata#MyAssets",
+      "@odata.count": 1,
+      "value": [
+        {
+          "assetID": "5e6e0a74-0380-41f7-9a6e-f4df408152d9",
+          "assetName": "DEMO-Allocated-Laptop-Alex",
+          "type": "Hardware",
+          "purchaseDate": "2026-05-04",
+          "expiryDate": "2027-05-04",
+          "status": "Allocated",
+          "allocatedTo": "Alex Morgan"
+        }
+      ]
+    }
+  },
+  {
+    "name": "missing-fields",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetName is required and must be no longer than 200 characters.",
+        "code": "INVALID_ASSET_NAME",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-fields",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "purchaseDate must be a valid date in YYYY-MM-DD format.",
+        "code": "INVALID_PURCHASE_DATE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-fields",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetName is required and must be no longer than 200 characters.",
+        "code": "INVALID_ASSET_NAME",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-action:allocateAsset",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetID is required.",
+        "code": "ASSET_ID_REQUIRED",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-action:returnAsset",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetID is required.",
+        "code": "ASSET_ID_REQUIRED",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-action:renewSoftwareLicense",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetID is required.",
+        "code": "ASSET_ID_REQUIRED",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-action:placeInMaintenance",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetID is required.",
+        "code": "ASSET_ID_REQUIRED",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-action:releaseFromMaintenance",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetID is required.",
+        "code": "ASSET_ID_REQUIRED",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "missing-action:retireAsset",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "assetID is required.",
+        "code": "ASSET_ID_REQUIRED",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "unknown-action:allocateAsset",
+    "status": 404,
+    "body": {
+      "error": {
+        "message": "Asset was not found.",
+        "code": "ASSET_NOT_FOUND",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "unknown-action:returnAsset",
+    "status": 404,
+    "body": {
+      "error": {
+        "message": "Asset was not found.",
+        "code": "ASSET_NOT_FOUND",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "unknown-action:renewSoftwareLicense",
+    "status": 404,
+    "body": {
+      "error": {
+        "message": "Asset was not found.",
+        "code": "ASSET_NOT_FOUND",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "unknown-action:placeInMaintenance",
+    "status": 404,
+    "body": {
+      "error": {
+        "message": "Asset was not found.",
+        "code": "ASSET_NOT_FOUND",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "unknown-action:releaseFromMaintenance",
+    "status": 404,
+    "body": {
+      "error": {
+        "message": "Asset was not found.",
+        "code": "ASSET_NOT_FOUND",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "unknown-action:retireAsset",
+    "status": 404,
+    "body": {
+      "error": {
+        "message": "Asset was not found.",
+        "code": "ASSET_NOT_FOUND",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "invalid-assignee:employee.unknown",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "Select an active employee from the trusted employee list.",
+        "code": "EMPLOYEE_NOT_ACTIVE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "invalid-assignee:employee.inactive",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "Select an active employee from the trusted employee list.",
+        "code": "EMPLOYEE_NOT_ACTIVE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "invalid-assignee:employee.alex' OR '1'='1",
+    "status": 400,
+    "body": {
+      "error": {
+        "message": "Select an active employee from the trusted employee list.",
+        "code": "EMPLOYEE_NOT_ACTIVE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "concurrent-six:0",
+    "status": 200,
+    "body": {
+      "@odata.context": "$metadata#Assets/$entity",
+      "createdAt": "2026-09-30T18:45:42.144Z",
+      "createdBy": "it.admin",
+      "modifiedAt": "2026-09-30T18:45:42.151Z",
+      "modifiedBy": "it.admin",
+      "assetID": "dff06414-8b84-4a23-99fc-b794c5de3dce",
+      "assetName": "AUDIT-CONCURRENT-SIX",
+      "type": "Hardware",
+      "purchaseDate": "2026-09-01",
+      "expiryDate": null,
+      "status": "Allocated",
+      "allocatedTo": "Alex Morgan",
+      "allocatedToUserId": "employee.alex",
+      "maintenanceReason": null,
+      "retiredAt": null,
+      "retirementReason": null
+    }
+  },
+  {
+    "name": "concurrent-six:1",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Only an unassigned Available asset can be allocated.",
+        "code": "ASSET_NOT_AVAILABLE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "concurrent-six:2",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Only an unassigned Available asset can be allocated.",
+        "code": "ASSET_NOT_AVAILABLE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "concurrent-six:3",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Only an unassigned Available asset can be allocated.",
+        "code": "ASSET_NOT_AVAILABLE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "concurrent-six:4",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Only an unassigned Available asset can be allocated.",
+        "code": "ASSET_NOT_AVAILABLE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "concurrent-six:5",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Only an unassigned Available asset can be allocated.",
+        "code": "ASSET_NOT_AVAILABLE",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "mismatched-history-return",
+    "status": 200,
+    "body": {
+      "@odata.context": "$metadata#Assets/$entity",
+      "createdAt": "2026-09-30T18:45:42.173Z",
+      "createdBy": "it.admin",
+      "modifiedAt": "2026-09-30T18:45:42.180Z",
+      "modifiedBy": "it.admin",
+      "assetID": "759aeb32-81a8-4e72-9e16-49f197fd30eb",
+      "assetName": "AUDIT-MISMATCH-HISTORY",
+      "type": "Hardware",
+      "purchaseDate": "2026-09-01",
+      "expiryDate": null,
+      "status": "Available",
+      "allocatedTo": null,
+      "allocatedToUserId": null,
+      "maintenanceReason": null,
+      "retiredAt": null,
+      "retirementReason": null
+    }
+  },
+  {
+    "name": "history-count-0",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Return requires exactly one active history record; no asset fields were changed.",
+        "code": "ALLOCATION_HISTORY_INCONSISTENT",
+        "@Common.numericSeverity": 4
+      }
+    }
+  },
+  {
+    "name": "history-count-2",
+    "status": 409,
+    "body": {
+      "error": {
+        "message": "Return requires exactly one active history record; no asset fields were changed.",
+        "code": "ALLOCATION_HISTORY_INCONSISTENT",
+        "@Common.numericSeverity": 4
+      }
+    }
+  }
+]

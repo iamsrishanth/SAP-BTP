@@ -1,0 +1,25 @@
+
+
+  Independent adversarial security and lifecycle audit
+    √ employee single key read returns the exact requested own asset
+    √ employee foreign key and unknown key read return 404
+    √ employee count and paged count remain scoped and accurate
+    √ employee detail selects the exact key when the employee has several assignments (65ms)
+    √ employee cannot navigate or expand into inventory/history private data
+    √ all employee and compliance writes are rejected (60ms)
+    √ missing resource PUT/PATCH cannot create incomplete inventory or history
+    √ invalid calendar dates and unknown identifiers fail without mutation
+    √ missing required registration fields and missing action arguments reject clearly
+    √ all lifecycle actions reject nonexistent UUID and unknown/inactive assignees
+    √ invalid and absent authentication receive 401
+    √ six simultaneous allocations produce one committed active history
+    √ return rejects a mismatched active history identity and leaves data unchanged
+    √ return with missing or duplicated active history rejects with no partial changes (48ms)
+    √ employee provisioning is admin-only and generic employee writes remain forbidden
+    √ provisioned identity preserves case and audit actor and duplicates cannot overwrite it
+    √ employee provisioning validates blanks, missing fields, lengths and control characters
+    √ concurrent provisioning creates one mapping and refuses to overwrite the winner
+    √ unknown roleless principals and provisioned subjects gain no inventory or Employee permissions (49ms)
+
+
+  19 passing (2s)

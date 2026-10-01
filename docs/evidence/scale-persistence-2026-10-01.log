@@ -1,0 +1,307 @@
+Backend scale and process-restart persistence acceptance
+Business date: 2026-10-01, timezone: Asia/Kolkata
+Scope: real CAP HTTP; disposable local SQLite; browser/cloud/HANA not exercised
+[child 19336 stdout] /> successfully deployed to <local-temp>\sap-asset-scale-QVmwek\isolated.sqlite
+
+[child 19336 stdout] [cds] - using auth strategy {
+  kind: 'mocked',
+  impl: 'node_modules\\@sap\\cds\\lib\\srv\\middlewares\\auth\\basic-auth.js'
+}
+2026-09-30T19:24:48.810Z CAP process ready pid=19336 port=64450 initialSeed=true
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/sessionInfo()
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets/$count
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '0'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '50'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '100'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '150'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '200'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '250'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '300'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '350'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '400'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '450'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '500'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '550'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '600'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '650'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '700'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '750'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '800'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '850'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '900'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '950'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '1000'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '1050'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '1100'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '1150'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '1200'
+}
+2026-09-30T19:24:49.220Z PASS inventory: 1200 assets, 24 pages of 50, accurate count, no duplicate IDs, empty terminal page
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '0',
+  '$search': 'LAPTOP',
+  '$filter': "type eq 'Hardware' and status eq 'Available'"
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '50',
+  '$search': 'LAPTOP',
+  '$filter': "type eq 'Hardware' and status eq 'Available'"
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '100',
+  '$search': 'LAPTOP',
+  '$filter': "type eq 'Hardware' and status eq 'Available'"
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '150',
+  '$search': 'LAPTOP',
+  '$filter': "type eq 'Hardware' and status eq 'Available'"
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '200',
+  '$search': 'LAPTOP',
+  '$filter': "type eq 'Hardware' and status eq 'Available'"
+}
+2026-09-30T19:24:49.272Z PASS combined filter: Hardware + Available + LAPTOP search produces exactly 200 assets, 4 pages
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '0'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '50'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '100'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '150'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets {
+  '$count': 'true',
+  '$orderby': 'assetName',
+  '$top': '50',
+  '$skip': '200'
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets { '$count': 'true', '$filter': "allocatedTo eq 'Jamie Chen'" }
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/MyAssets(9131b2fc-fe22-4656-8adb-a23ec967a8d1)
+[child 19336 stderr] [odata] - 404 - Error: Not Found
+    at C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\odata\middleware\read.js:261:19 {
+  status: 404,
+  code: '404',
+  _i18n: 1
+}
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/Assets { '$top': '50' }
+[child 19336 stderr] [odata] - 403 - Error: Forbidden
+    at reject (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\_runtime\common\generic\auth\utils.js:10:19)
+    at AssetManagementService.enforce_auth (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\_runtime\common\generic\auth\restrict.js:229:5)
+    at AssetManagementService.handle_authorization (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\_runtime\common\generic\auth\index.js:79:27)
+    at AssetManagementService.handle (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\_runtime\common\Service.js:73:47)
+    at AssetManagementService.dispatch (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:32:17)
+    at C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:20:50
+    at AssetManagementService.run (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\cds.Service.js:171:44)
+    at AssetManagementService.dispatch (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-dispatch.js:20:36)
+    at C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\odata\middleware\read.js:258:24
+    at C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\srv-tx.js:27:48 {
+  internal: null,
+  code: '403',
+  status: 403,
+  _i18n: 1
+}
+2026-09-30T19:24:49.335Z PASS employee scope: 200 own assets in 4 pages; foreign key404, broad foreign filter0, inventory403
+[child 19336 stdout] [odata] - POST /odata/v4/asset-management/Assets
+[child 19336 stdout] [odata] - POST /odata/v4/asset-management/allocateAsset
+[child 19336 stdout] [odata] - GET /odata/v4/asset-management/AllocationHistories {
+  '$filter': 'assetID_assetID eq ecbeeb19-d83a-41a6-a226-f0e4627858ec',
+  '$top': '50'
+}
+2026-09-30T19:24:49.428Z CAP process fully stopped pid=19336 exitCode=0
+[child 13584 stdout] /> successfully deployed to <local-temp>\sap-asset-scale-QVmwek\isolated.sqlite
+
+[child 13584 stdout] [cds] - using auth strategy {
+  kind: 'mocked',
+  impl: 'node_modules\\@sap\\cds\\lib\\srv\\middlewares\\auth\\basic-auth.js'
+}
+2026-09-30T19:24:50.368Z CAP process ready pid=13584 port=64460 initialSeed=false
+[child 13584 stdout] [odata] - GET /odata/v4/asset-management/Assets(ecbeeb19-d83a-41a6-a226-f0e4627858ec)
+[child 13584 stdout] [odata] - GET /odata/v4/asset-management/Assets/$count
+[child 13584 stdout] [odata] - GET /odata/v4/asset-management/AllocationHistories {
+  '$filter': 'assetID_assetID eq ecbeeb19-d83a-41a6-a226-f0e4627858ec',
+  '$top': '50'
+}
+[child 13584 stdout] [odata] - GET /odata/v4/asset-management/MyAssets(ecbeeb19-d83a-41a6-a226-f0e4627858ec)
+[child 13584 stdout] [odata] - GET /odata/v4/asset-management/MyAssets/$count
+2026-09-30T19:24:50.449Z PASS persisted allocation after full process restart: asset=ecbeeb19-d83a-41a6-a226-f0e4627858ec history=456709c2-46e0-496a-b3d5-2999c55ca1bc
+[child 13584 stdout] [odata] - POST /odata/v4/asset-management/returnAsset
+2026-09-30T19:24:50.517Z CAP process fully stopped pid=13584 exitCode=0
+[child 8344 stdout] /> successfully deployed to <local-temp>\sap-asset-scale-QVmwek\isolated.sqlite
+
+[child 8344 stdout] [cds] - using auth strategy {
+  kind: 'mocked',
+  impl: 'node_modules\\@sap\\cds\\lib\\srv\\middlewares\\auth\\basic-auth.js'
+}
+2026-09-30T19:24:51.466Z CAP process ready pid=8344 port=64465 initialSeed=false
+[child 8344 stdout] [odata] - GET /odata/v4/asset-management/Assets(ecbeeb19-d83a-41a6-a226-f0e4627858ec)
+[child 8344 stdout] [odata] - GET /odata/v4/asset-management/AllocationHistories {
+  '$filter': 'assetID_assetID eq ecbeeb19-d83a-41a6-a226-f0e4627858ec',
+  '$top': '50'
+}
+[child 8344 stdout] [odata] - GET /odata/v4/asset-management/MyAssets(ecbeeb19-d83a-41a6-a226-f0e4627858ec)
+[child 8344 stderr] [odata] - 404 - Error: Not Found
+    at C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\libx\odata\middleware\read.js:261:19 {
+  status: 404,
+  code: '404',
+  _i18n: 1
+}
+2026-09-30T19:24:51.535Z PASS persisted return after second full restart: Available, assignment cleared, same history record closed, former employee404
+2026-09-30T19:24:51.562Z CAP process fully stopped pid=8344 exitCode=0
+2026-09-30T19:24:51.568Z RESULT PASS; 6 checks; 3 CAP processes; fixtureRemoved=true; duration=4090ms

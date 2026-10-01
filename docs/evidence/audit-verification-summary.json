@@ -1,0 +1,57 @@
+{
+  "date": "2026-10-01",
+  "timezone": "Asia/Kolkata",
+  "backendIndependent": {
+    "adapter": "isolated in-memory SQLite",
+    "fail": 0,
+    "businessDate": "2026-10-01",
+    "pass": 19
+  },
+  "routerNode24": {
+    "fail": 0,
+    "version": "24.16.0",
+    "pass": 5
+  },
+  "routerNode22": {
+    "fail": 0,
+    "version": "22.23.3",
+    "pass": 5
+  },
+  "routerAudit": {
+    "residual": "GHSA-vcc3-ghjq-m6fr remains in old CommonJS decoder; tested request-target entry is guarded; no audit suppression",
+    "critical": 0,
+    "moderate": 3,
+    "high": 0,
+    "highThresholdExit": 0
+  },
+  "sourceFingerprints": [
+    {
+      "path": "db/schema.cds",
+      "sha256": "899c445a60224bbd1fa467e77e11e0175d33e1c258350313111fff8ce57f886b"
+    },
+    {
+      "path": "srv/asset-management-service.cds",
+      "sha256": "6371b4971df3c675c5d323ee114a870037e18b39afa59809b13ecaf973cfa1e5"
+    },
+    {
+      "path": "srv/asset-management-service.js",
+      "sha256": "2a1c478bba1a47728d27a4c6329148d2734de1858bdfa63584409d62436ea3f2"
+    },
+    {
+      "path": ".deploy/app-router/package.json",
+      "sha256": "b67d79dd012c9285b54b180d33a8ee44f501cae301755a2bdd5e2fb11eafbbc7"
+    },
+    {
+      "path": ".deploy/app-router/package-lock.json",
+      "sha256": "d71e3f651d6e36a54617ad6d4219c9e3f09b38c01853da485d634eab77c9601d"
+    },
+    {
+      "path": ".deploy/app-router/startup.js",
+      "sha256": "23b408ac5708bca2098238148ee7a78f2023f6c5927dc335cbf4f8fe1297a0af"
+    },
+    {
+      "path": ".deploy/app-router/test/router-startup.test.js",
+      "sha256": "cbfa5415e24054ebae798989c272550fd2dc83d5b9e63e537ae9876d3349ff41"
+    }
+  ]
+}
