@@ -11,6 +11,10 @@
     {
       "name": "$XSAPPNAME.Employee",
       "description": "Employee"
+    },
+    {
+      "name": "$XSAPPNAME.DemoOperator",
+      "description": "Operate the explicitly enabled trial demo profiles"
     }
   ],
   "attributes": [],
@@ -37,6 +41,12 @@
       "scope-references": [
         "$XSAPPNAME.Employee"
       ],
+      "attribute-references": []
+    },
+    {
+      "name": "DemoOperator",
+      "description": "Trial demo operator: may select restricted IT Admin, Employee and Compliance profiles when enabled",
+      "scope-references": ["$XSAPPNAME.DemoOperator"],
       "attribute-references": []
     }
   ]

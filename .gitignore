@@ -1,5 +1,6 @@
 node_modules/
 db-backups/
+demo-data-private/
 .deploy/app-router/node_modules/
 .deploy/app-router/default-env.json
 db.sqlite

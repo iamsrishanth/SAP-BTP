@@ -64,6 +64,10 @@ service AssetManagementService {
     roles        : many String;
     businessToday: Date;
     timeZone     : String(100);
+    authenticationMode : String(30);
+    demoProfilesAvailable : Boolean;
+    activeDemoProfile : String(50);
+    demoOperatorUserId : String(255);
   };
 
   @requires: 'ITAdmin'

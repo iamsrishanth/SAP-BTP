@@ -1,6 +1,7 @@
 const cds = require('@sap/cds')
 const { SELECT, INSERT, UPDATE, DELETE } = cds.ql
 const { businessToday, businessTimeZone } = require('./date-rules')
+const { getDemoProfileSessionInfo } = require('./demo-profile')
 
 // Demo fixtures live outside the generated service package. Load their
 // development-only listener only when demo seeding is enabled; the production
@@ -663,7 +664,9 @@ module.exports = class AssetManagementService extends cds.ApplicationService {
         userId,
         roles,
         businessToday: businessToday(),
-        timeZone: businessTimeZone()
+        timeZone: businessTimeZone(),
+        authenticationMode: cds.env.requires.auth?.kind || 'unknown',
+        ...getDemoProfileSessionInfo()
       }
     })
 

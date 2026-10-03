@@ -1,0 +1,132 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 test
+> mocha --timeout 30000 "test/**/*.test.js"
+
+
+
+  Asset Management CAP service
+    √ reports authenticated principal IDs and restricts each role at the API boundary (473ms)
+    √ enforces employee identity server-side even when a client submits a broader filter
+    √ preserves employee key predicates, selected fields and accurate scoped counts (38ms)
+    √ provisions exact trusted subject mappings with authenticated administrator auditing
+    √ rejects invalid, duplicate and non-admin employee provisioning without mutable mappings
+    √ allows one concurrent mapping insert without duplicate or overwritten identity records
+    √ registers, reads, edits, and safely deletes only an unassigned asset without history
+    √ rejects invalid registration fields, types, dates, and missing software expiry
+    √ rejects absent names, absent purchase dates and invalid calendar dates without creating rows
+    √ rejects nonexistent lifecycle UUIDs, missing arguments and inactive or unknown assignees (38ms)
+    √ allocates atomically, records the trusted employee, returns once, and preserves history (40ms)
+    √ allows only one of two concurrent allocation requests to commit
+    √ rejects missing, duplicate and mismatched active return histories without partial updates (82ms)
+    √ renews only software, updates compliance immediately, and leaves allocation status separate (41ms)
+    √ distinguishes expired, expiring, warranty, missing-date, and idle boundary cases
+    √ blocks retirement of allocated assets, preserves history, and forbids allocation after retirement
+    √ applies controlled maintenance transitions and denies generic history manipulation
+    √ never enables demo runtime seeding in a production environment or profile (293ms)
+    √ migrates the required history association idempotently while preserving rows and a backup (160ms)
+
+  Demo data snapshot transfer (temporary persistent SQLite)
+    √ preserves every UUID, literal history FK, employee identity and business/audit field (54ms)
+    √ exports deterministically without mutating or seeding the persistent source
+    √ reports a repeated identical import without replacing rows or their audits
+    √ rejects a different populated destination without modifying a single row
+    √ requires all tables to be empty, including an employee-only destination
+    √ rolls back earlier employee inserts if a later database constraint fails
+    √ rejects broken foreign keys, inconsistent employee mappings and duplicate active history
+    √ rejects missing/unknown fields, duplicate keys, invalid types, dates, UUIDs and audit values
+    √ rejects malformed metadata, unsupported versions and count/hash mismatches before writing
+    √ allows only the explicitly expected HANA service/database identity and a strict host fallback
+    √ exports through the standalone CLI to a private temp file and never overwrites it (316ms)
+    √ rejects CLI destination guards before touching a database and never logs VCAP secrets (208ms)
+
+  Scoped XSUAA demo profiles
+    √ rejects forged headers from anonymous and Basic/mock users
+    √ requires DemoOperator even when the verified user has every business role
+    √ is disabled unless the exact feature flag is true
+    √ rejects unknown, malformed, multiple, or arbitrary identity selections
+    √ keeps native SAP scopes and the original principal by default or for sap
+    √ narrows each selected profile to one business role with fixed employee IDs
+    √ preserves validated authInfo, user attributes, and tenant and ignores identity headers
+    √ rejects machine, system, missing-identity, and inconsistent token principals
+    √ keeps simultaneous users, tenants, and native requests isolated across asynchronous work
+    √ retains original actor information in nested CAP contexts and returns safe defaults outside HTTP
+
+  Demo profile integration with the existing CAP application
+    1) preserves bootstrap/seeding, HTTP auth, employee row isolation, and SAP actor audit fields
+
+
+  41 passing (4s)
+  1 failing
+
+  1) Demo profile integration with the existing CAP application
+       preserves bootstrap/seeding, HTTP auth, employee row isolation, and SAP actor audit fields:
+
+      AssertionError [ERR_ASSERTION]: [cds] - using auth strategy {
+  kind: 'mocked',
+  impl: 'node_modules\\@sap\\cds\\lib\\srv\\middlewares\\auth\\basic-auth.js'
+}
+/> successfully deployed to in-memory database. 
+
+[odata] - GET /odata/v4/asset-management/sessionInfo() 
+[odata] - 403 - Error: Demo profiles are unavailable for this authenticated session.
+    at forbidden (srv\demo-profile.js:34:24)
+    at demoProfileMiddleware (srv\demo-profile.js:48:17)
+    at Layer.handleRequest (node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (node_modules\router\index.js:342:13)
+    at C:\Code\SAP\SAP-BTP\node_modules\router\index.js:297:9
+    at processParams (node_modules\router\index.js:582:12)
+    at next (node_modules\router\index.js:291:5)
+    at basic_auth (C:\Code\SAP\SAP-BTP\node_modules\@sap\cds\lib\srv\middlewares\auth\basic-auth.js:43:5) {
+  status: 403,
+  code: 'ASSET_DEMO_PROFILE_FORBIDDEN'
+}
+[odata] - 403 - Error: Demo profiles are unavailable for this authenticated session.
+    at forbidden (srv\demo-profile.js:34:24)
+    at demoProfileMiddleware (srv\demo-profile.js:48:17)
+    at Layer.handleRequest (node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (node_modules\router\index.js:342:13)
+    at C:\Code\SAP\SAP-BTP\node_modules\router\index.js:297:9
+    at processParams (node_modules\router\index.js:582:12)
+    at next (node_modules\router\index.js:291:5)
+    at basic_auth (node_modules\@sap\cds\lib\srv\middlewares\auth\basic-auth.js:30:73)
+    at Layer.handleRequest (node_modules\router\lib\layer.js:152:17)
+    at trimPrefix (C:\Code\SAP\SAP-BTP\node_modules\router\index.js:342:13) {
+  status: 403,
+  code: 'ASSET_DEMO_PROFILE_FORBIDDEN'
+}
+AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+
+Caught error:
+
+Error
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+    at async main ([eval]:52:11) {
+  generatedMessage: true,
+  code: 'ERR_ASSERTION',
+  actual: [Error],
+  expected: [Function (anonymous)],
+  operator: 'rejects',
+  diff: 'simple'
+}
+
+
+1 !== 0
+
+      + expected - actual
+
+      -1
+      +0
+      
+      at Context.<anonymous> (test\demo-profile.test.js:291:12)
+      at callFn (file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runnable.js:360:23)
+      at Test.run (file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runnable.js:348:7)
+      at Runner.runTest (file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runner.js:809:10)
+      at file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runner.js:949:12
+      at next (file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runner.js:724:14)
+      at file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runner.js:734:7
+      at next (file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runner.js:595:14)
+      at Immediate._onImmediate (file:///C:/Code/SAP/SAP-BTP/node_modules/mocha/lib/runner.js:702:5)
+      at process.processImmediate (node:internal/timers:504:21)
+
+
+

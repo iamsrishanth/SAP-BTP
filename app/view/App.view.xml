@@ -25,12 +25,27 @@
             </HBox>
             <HBox alignItems="Center" class="identityActions">
               <Text text="Business date: {page>/businessToday} · {page>/timeZone}" class="businessDate" />
-              <Button icon="sap-icon://refresh" tooltip="Refresh current view" type="Transparent" press=".onRefresh" />
+              <Button icon="sap-icon://refresh" tooltip="Refresh current view" type="Transparent" press=".onRefresh" enabled="{page>/hasBusinessRole}" />
               <Button text="Sign out" icon="sap-icon://log" type="Transparent" press=".onSignOut" />
             </HBox>
           </HBox>
 
-          <IconTabBar id="sectionTabs" class="sectionTabs" expandable="false" selectedKey="inventory" select=".onSectionChange" visible="{page>/connected}">
+          <OverflowToolbar visible="{= ${page>/connected} &amp;&amp; ${page>/demoProfilesAvailable} }">
+            <Label id="demoProfileLabel" text="Demo profile" labelFor="demoProfileSelect" />
+            <Select id="demoProfileSelect" selectedKey="{page>/activeDemoProfile}" change=".onDemoProfileChange" ariaLabelledBy="demoProfileLabel" width="16rem" tooltip="Choose a server-authorized demo profile">
+              <items>
+                <core:Item key="sap" text="SAP identity" />
+                <core:Item key="it.admin" text="Demo IT Admin" />
+                <core:Item key="employee.alex" text="Demo Employee Alex" />
+                <core:Item key="employee.jamie" text="Demo Employee Jamie" />
+                <core:Item key="compliance.manager" text="Demo Compliance Manager" />
+              </items>
+            </Select>
+            <ObjectStatus text="{page>/demoProfileLabel}" state="Information" />
+          </OverflowToolbar>
+          <Text text="{page>/demoProfileDescription}" wrapping="true" class="listHelp" visible="{= ${page>/connected} &amp;&amp; ${page>/demoProfilesAvailable} }" />
+
+          <IconTabBar id="sectionTabs" class="sectionTabs" expandable="false" selectedKey="inventory" select=".onSectionChange" visible="{= ${page>/connected} &amp;&amp; ${page>/hasBusinessRole} }">
             <items>
               <IconTabFilter key="inventory" text="Inventory" icon="sap-icon://laptop" visible="{page>/canAdmin}" />
               <IconTabFilter key="myAssets" text="My Assets" icon="sap-icon://employee" visible="{page>/isEmployee}" />
@@ -59,20 +74,20 @@
               </headerToolbar>
               <content>
                 <VBox class="loginContent">
-                  <Text text="Sign in with your authorized CAP identity. Your password stays in memory for this tab and is cleared when you sign out or close the page." wrapping="true" />
+                  <Text text="For SAP BTP, connect using your signed-in SAP session. Authorized demo operators can choose a demo profile after connecting." wrapping="true" />
                   <MessageStrip text="{page>/loginError}" type="Error" showIcon="true" visible="{page>/loginErrorVisible}" />
-                  <Label text="Local mock user name" labelFor="loginUsername" required="true" />
+                  <Label text="Local mock user name" labelFor="loginUsername" />
                   <Input id="loginUsername" value="{login>/username}" placeholder="Enter the configured local user" submit=".onConnect" />
-                  <Label text="Local mock password" labelFor="loginPassword" required="true" />
+                  <Label text="Local mock password" labelFor="loginPassword" />
                   <Input id="loginPassword" value="{login>/password}" type="Password" placeholder="Enter the configured local password" submit=".onConnect" />
-                  <Text text="For Cloud Foundry, use the authenticated SAP BTP session and leave both fields empty." wrapping="true" class="loginHint" />
+                  <Text text="These credentials are only for the local development server. Leave both fields empty for SAP BTP. Credentials and tokens are never saved to browser storage." wrapping="true" class="loginHint" />
                   <Button text="Connect" icon="sap-icon://connected" type="Emphasized" press=".onConnect" enabled="{= !${page>/busy} }" />
                 </VBox>
               </content>
             </Panel>
           </VBox>
 
-          <VBox id="workArea" class="workArea" visible="{page>/connected}" busy="{page>/busy}" busyIndicatorDelay="150" busyIndicatorSize="Medium">
+          <VBox id="workArea" class="workArea" visible="{= ${page>/connected} &amp;&amp; ${page>/hasBusinessRole} }" busy="{page>/busy}" busyIndicatorDelay="150" busyIndicatorSize="Medium">
             <HBox id="inventoryWorkspace" class="workspace" fitContainer="true" visible="{page>/listVisible}">
               <VBox id="masterPanel" class="masterPanel" width="39%">
                 <Toolbar class="panelToolbar">

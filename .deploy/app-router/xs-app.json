@@ -1,4 +1,8 @@
 {
+  "logout": {
+    "logoutEndpoint": "/logout",
+    "logoutPage": "/"
+  },
   "routes": [
     {
       "source": "^/(.*)$",

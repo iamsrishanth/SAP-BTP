@@ -1,0 +1,61 @@
+
+> sap-btp-it-asset-lifecycle@1.0.0 test
+> mocha --timeout 30000 "test/**/*.test.js"
+
+
+
+  Asset Management CAP service
+    √ reports authenticated principal IDs and restricts each role at the API boundary (139ms)
+    √ enforces employee identity server-side even when a client submits a broader filter
+    √ preserves employee key predicates, selected fields and accurate scoped counts (38ms)
+    √ provisions exact trusted subject mappings with authenticated administrator auditing
+    √ rejects invalid, duplicate and non-admin employee provisioning without mutable mappings
+    √ allows one concurrent mapping insert without duplicate or overwritten identity records
+    √ registers, reads, edits, and safely deletes only an unassigned asset without history
+    √ rejects invalid registration fields, types, dates, and missing software expiry
+    √ rejects absent names, absent purchase dates and invalid calendar dates without creating rows (38ms)
+    √ rejects nonexistent lifecycle UUIDs, missing arguments and inactive or unknown assignees
+    √ allocates atomically, records the trusted employee, returns once, and preserves history (47ms)
+    √ allows only one of two concurrent allocation requests to commit
+    √ rejects missing, duplicate and mismatched active return histories without partial updates (66ms)
+    √ renews only software, updates compliance immediately, and leaves allocation status separate
+    √ distinguishes expired, expiring, warranty, missing-date, and idle boundary cases
+    √ blocks retirement of allocated assets, preserves history, and forbids allocation after retirement
+    √ applies controlled maintenance transitions and denies generic history manipulation
+    √ never enables demo runtime seeding in a production environment or profile (266ms)
+    √ migrates the required history association idempotently while preserving rows and a backup (176ms)
+
+  Demo data snapshot transfer (temporary persistent SQLite)
+    √ preserves every UUID, literal history FK, employee identity and business/audit field (56ms)
+    √ exports deterministically without mutating or seeding the persistent source
+    √ reports a repeated identical import without replacing rows or their audits
+    √ rejects a different populated destination without modifying a single row
+    √ requires all tables to be empty, including an employee-only destination
+    √ rolls back earlier employee inserts if a later database constraint fails
+    √ rejects broken foreign keys, inconsistent employee mappings and duplicate active history
+    √ rejects missing/unknown fields, duplicate keys, invalid types, dates, UUIDs and audit values (45ms)
+    √ rejects malformed metadata, unsupported versions and count/hash mismatches before writing
+    √ allows only the explicitly expected HANA service/database identity and a strict host fallback
+    √ rejects an approved database_id paired with any unapproved or malformed destination host
+    √ exports through the standalone CLI to a private temp file and never overwrites it (338ms)
+    √ rejects CLI destination guards before touching a database and never logs VCAP secrets (346ms)
+
+  Scoped XSUAA demo profiles
+    √ rejects forged headers from anonymous and Basic/mock users
+    √ requires DemoOperator even when the verified user has every business role
+    √ is disabled unless the exact feature flag is true
+    √ rejects unknown, malformed, multiple, or arbitrary identity selections
+    √ keeps native SAP scopes and the original principal by default or for sap
+    √ narrows each selected profile to one business role with fixed employee IDs
+    √ allows the dedicated operator scope to select only the fixed demo business roles
+    √ preserves validated authInfo, user attributes, and tenant and ignores identity headers
+    √ rejects machine, system, missing-identity, and inconsistent token principals
+    √ keeps simultaneous users, tenants, and native requests isolated across asynchronous work
+    √ retains original actor information in nested CAP contexts and returns safe defaults outside HTTP
+
+  Demo profile integration with the existing CAP application
+    √ preserves bootstrap/seeding, HTTP auth, employee row isolation, and SAP actor audit fields (917ms)
+
+
+  44 passing (3s)
+

@@ -22,6 +22,7 @@ modules:
       buildpack: nodejs_buildpack
     properties:
       ASSET_SEED_DEMO: "false"
+      ASSET_DEMO_PROFILES_ENABLED: "false"
       ASSET_TIME_ZONE: Asia/Kolkata
     build-parameters:
       builder: npm-ci
@@ -92,6 +93,10 @@ resources:
             description: 'generated'
             role-template-references:
               - '$XSAPPNAME.Employee'
+          - name: 'AssetDemoOperator (sap-btp-it-asset-lifecycle ${org}-${space})'
+            description: 'Restricted trial demo profile operator; no automatic user assignment'
+            role-template-references:
+              - '$XSAPPNAME.DemoOperator'
     requires:
       - name: app-api
   - name: sap-btp-it-asset-lifecycle-db

@@ -37,6 +37,13 @@ sap.ui.define([
 
   var SERVICE_ROOT = "/odata/v4/asset-management/";
   var PAGE_SIZE = 25;
+  var DEMO_PROFILES = {
+    sap: "SAP identity",
+    "it.admin": "Demo IT Admin",
+    "employee.alex": "Demo Employee Alex",
+    "employee.jamie": "Demo Employee Jamie",
+    "compliance.manager": "Demo Compliance Manager"
+  };
 
   function firstDefined() {
     for (var i = 0; i < arguments.length; i += 1) {
@@ -136,6 +143,9 @@ sap.ui.define([
       this._csrfToken = "";
       this._csrfChecked = false;
       this._authenticated = false;
+      this._sessionGeneration = 0;
+      this._demoProfile = "sap";
+      this._sessionDialogs = [];
       this._selectedAssetId = "";
       this._searchTimer = null;
       this._employees = [];
@@ -153,6 +163,8 @@ sap.ui.define([
     },
 
     onExit: function () {
+      this._sessionGeneration += 1;
+      this._closeSessionDialogs();
       if (this._searchTimer) {
         clearTimeout(this._searchTimer);
       }
@@ -176,7 +188,29 @@ sap.ui.define([
       this._page().setProperty("/" + name, value);
     },
 
+    _isCurrentSession: function (generation) {
+      return generation === this._sessionGeneration;
+    },
+
+    _assertCurrentSession: function (generation) {
+      if (!this._isCurrentSession(generation)) {
+        throw Object.assign(new Error("The session changed while this request was in progress."), { staleSession: true });
+      }
+    },
+
+    _profileHeaders: function (headers) {
+      var result = Object.assign({}, headers || {});
+      if (this._authorization) {
+        result.Authorization = this._authorization;
+      }
+      if (this._demoProfile !== "sap") {
+        result["X-Asset-Demo-Profile"] = this._demoProfile;
+      }
+      return result;
+    },
+
     _request: async function (path, options) {
+      var generation = this._sessionGeneration;
       var requestOptions = Object.assign({
         method: "GET",
         cache: "no-store",
@@ -184,14 +218,12 @@ sap.ui.define([
       }, options || {});
       requestOptions.method = String(requestOptions.method || "GET").toUpperCase();
       if (requestOptions.method !== "GET" && requestOptions.method !== "HEAD") {
-        await this._ensureCsrfToken();
+        await this._ensureCsrfToken(generation);
+        this._assertCurrentSession(generation);
       }
-      requestOptions.headers = Object.assign({
+      requestOptions.headers = this._profileHeaders(Object.assign({
         Accept: "application/json"
-      }, requestOptions.headers || {});
-      if (this._authorization) {
-        requestOptions.headers.Authorization = this._authorization;
-      }
+      }, requestOptions.headers || {}));
       if (this._csrfToken) {
         requestOptions.headers["X-CSRF-Token"] = this._csrfToken;
       }
@@ -203,6 +235,7 @@ sap.ui.define([
       try {
         response = await fetch(SERVICE_ROOT + path, requestOptions);
       } catch (error) {
+        this._assertCurrentSession(generation);
         var networkError = new Error("Could not reach the CAP service at " + SERVICE_ROOT + " Check that the local server is running and reachable.");
         networkError.cause = error;
         throw networkError;
@@ -218,6 +251,7 @@ sap.ui.define([
           body = textBody ? { message: textBody } : null;
         }
       }
+      this._assertCurrentSession(generation);
       if (!response.ok) {
         var error = new Error(errorMessage(body, response.status));
         error.status = response.status;
@@ -227,18 +261,15 @@ sap.ui.define([
       return body;
     },
 
-    _ensureCsrfToken: async function () {
+    _ensureCsrfToken: async function (generation) {
+      this._assertCurrentSession(generation);
       if (this._csrfChecked) {
         return;
       }
-      this._csrfChecked = true;
-      var headers = {
+      var headers = this._profileHeaders({
         Accept: "application/json",
         "X-CSRF-Token": "Fetch"
-      };
-      if (this._authorization) {
-        headers.Authorization = this._authorization;
-      }
+      });
       try {
         var response = await fetch(SERVICE_ROOT, {
           method: "GET",
@@ -246,8 +277,10 @@ sap.ui.define([
           credentials: "same-origin",
           headers: headers
         });
+        this._assertCurrentSession(generation);
         if (response.status === 401 || response.status === 403) {
           var authBody = await response.json().catch(function () { return null; });
+          this._assertCurrentSession(generation);
           throw Object.assign(new Error(errorMessage(authBody, response.status)), { status: response.status });
         }
         if (response.ok) {
@@ -256,7 +289,10 @@ sap.ui.define([
             this._csrfToken = token;
           }
         }
+        this._csrfChecked = true;
       } catch (error) {
+        this._assertCurrentSession(generation);
+        this._csrfChecked = false;
         if (error.status === 401 || error.status === 403) {
           throw error;
         }
@@ -278,7 +314,10 @@ sap.ui.define([
       return path + (query ? "?" + query : "");
     },
 
-    _setBusy: function (busy, text) {
+    _setBusy: function (busy, text, generation) {
+      if (generation !== undefined && !this._isCurrentSession(generation)) {
+        return;
+      }
       this._set("busy", busy);
       if (text) {
         this._set("busyText", text);
@@ -295,6 +334,9 @@ sap.ui.define([
     },
 
     _reportFailure: function (error, prefix) {
+      if (error && error.staleSession) {
+        return;
+      }
       var text = (prefix ? prefix + " " : "") + (error && error.message ? error.message : "An unexpected error occurred.");
       Log.error(text, error && error.stack, "it.asset.lifecycle.controller.App");
       this._feedback(text, error && error.status === 403 ? "Warning" : "Error");
@@ -311,35 +353,122 @@ sap.ui.define([
         return;
       }
 
-      this._set("loginErrorVisible", false);
+      var generation = this._beginSession("sap", false);
       this._authorization = username ? "Basic " + window.btoa(username + ":" + password) : "";
+      loginModel.setProperty("/password", "");
+      await this._connectSession(generation, false);
+    },
+
+    onDemoProfileChange: async function (event) {
+      var profile = event.getSource().getSelectedKey();
+      if (!this._page().getProperty("/demoProfilesAvailable") || !Object.prototype.hasOwnProperty.call(DEMO_PROFILES, profile) || profile === this._demoProfile) {
+        return;
+      }
+      var generation = this._beginSession(profile, true);
+      await this._connectSession(generation, true);
+    },
+
+    _closeSessionDialogs: function () {
+      (this._sessionDialogs || []).slice().forEach(function (dialog) {
+        dialog.destroy();
+      });
+      this._sessionDialogs = [];
+    },
+
+    _clearSessionData: function () {
+      if (this._searchTimer) {
+        clearTimeout(this._searchTimer);
+        this._searchTimer = null;
+      }
+      this._closeSessionDialogs();
       this._csrfToken = "";
       this._csrfChecked = false;
-      loginModel.setProperty("/password", "");
+      this._authenticated = false;
+      this._selectedAssetId = "";
+      this._assetRows = [];
+      this._employees = [];
+      var cleared = {
+        userId: "", roleLabel: "", businessToday: "", timeZone: "",
+        hasBusinessRole: false, canAdmin: false, canCompliance: false, isEmployee: false,
+        activeSection: "", listVisible: false, inventoryVisible: false, myAssetsVisible: false, complianceVisible: false,
+        detailVisible: false, mobileDetail: false, selected: null, hasSelection: false,
+        selectedTitle: "Select an asset", selectedStatus: "", selectedStatusState: "None",
+        detailComplianceText: "", detailComplianceVisible: false, detailComplianceType: "Information",
+        historyCaption: "", history: [], historyLoaded: false, historyLoading: false,
+        items: [], employees: [], complianceGroups: [], counts: {},
+        complianceIntro: "Software license compliance and hardware warranty coverage are shown separately. Lifecycle status remains independent of expiry alerts.",
+        query: "", filterStatus: "", filterType: "", skip: 0, pageNumber: 1,
+        totalCount: 0, hasMore: false, hasPrevious: false, listTitle: "", listHelp: "",
+        feedbackText: "", feedbackVisible: false, loginError: "", loginErrorVisible: false,
+        demoProfileDescription: ""
+      };
+      Object.keys(cleared).forEach(function (name) { this._set(name, cleared[name]); }, this);
+      this._updateActionVisibility(null);
+      this._applyMobilePanels(false);
+    },
+
+    _beginSession: function (profile, keepDemoAccess) {
+      this._sessionGeneration += 1;
+      this._clearSessionData();
+      this._demoProfile = profile;
+      this._set("activeDemoProfile", profile);
+      this._set("demoProfileLabel", DEMO_PROFILES[profile]);
+      this._set("connected", !!keepDemoAccess);
+      this._set("loginVisible", !keepDemoAccess);
+      if (!keepDemoAccess) {
+        this._set("authenticationMode", "");
+        this._set("demoProfilesAvailable", false);
+        this._set("demoOperatorUserId", "");
+      }
+      return this._sessionGeneration;
+    },
+
+    _connectSession: async function (generation, profileChange) {
       this._setBusy(true, "Checking your CAP session…");
 
       try {
         var raw = await this._request("sessionInfo()", { method: "GET" });
+        this._assertCurrentSession(generation);
         var session = unwrap(raw);
         var roles = getRoleNames(session);
         var admin = includesRole(roles, "ITAdmin");
         var compliance = includesRole(roles, "ComplianceManager") || admin;
         var employee = includesRole(roles, "Employee");
-        if (!admin && !compliance && !employee) {
+        var demoAvailable = session.demoProfilesAvailable === true;
+        var hasBusinessRole = admin || compliance || employee;
+        if (!hasBusinessRole && !demoAvailable) {
           throw new Error("The authenticated CAP session did not report Employee, ITAdmin, or ComplianceManager access.");
+        }
+        var activeProfile = firstDefined(session.activeDemoProfile, "sap");
+        if (!Object.prototype.hasOwnProperty.call(DEMO_PROFILES, activeProfile) || (!demoAvailable && activeProfile !== "sap") || activeProfile !== this._demoProfile) {
+          throw new Error("CAP did not confirm the requested demo profile. Reconnect using your SAP identity.");
         }
 
         this._authenticated = true;
         this._set("connected", true);
         this._set("loginVisible", false);
         this._set("loginErrorVisible", false);
+        this._set("authenticationMode", firstDefined(session.authenticationMode, ""));
+        this._set("demoProfilesAvailable", demoAvailable);
+        this._set("demoOperatorUserId", firstDefined(session.demoOperatorUserId, ""));
+        this._set("activeDemoProfile", activeProfile);
+        this._set("demoProfileLabel", DEMO_PROFILES[activeProfile]);
+        this._set("demoProfileDescription", activeProfile === "sap"
+          ? "Using your SAP identity. Choose a demo profile to explore its server-authorized view."
+          : "Demo profile: " + DEMO_PROFILES[activeProfile] + " · " + activeProfile + ". Employee Alex and Employee Jamie are demo aliases. SAP operator: " + firstDefined(session.demoOperatorUserId, "signed-in SAP user") + ".");
+        this._set("hasBusinessRole", hasBusinessRole);
         this._set("userId", firstDefined(session.userId, session.userID, session.id, session.subject, "Signed-in user"));
         this._set("businessToday", firstDefined(session.businessToday, session.today, ""));
         this._set("timeZone", firstDefined(session.timeZone, ""));
         this._set("canAdmin", admin);
         this._set("canCompliance", compliance);
         this._set("isEmployee", employee);
-        this._set("roleLabel", roles.join(", "));
+        this._set("roleLabel", roles.join(", ") || "Demo operator");
+
+        if (!hasBusinessRole) {
+          this._feedback("Your SAP identity is authorized to use demo profiles. Choose a Demo profile above to open its permitted view.", "Information");
+          return;
+        }
 
         var firstSection = admin ? "inventory" : (employee ? "myAssets" : "compliance");
         this._set("activeSection", firstSection);
@@ -360,7 +489,9 @@ sap.ui.define([
         if (admin) {
           try {
             await this._loadEmployees();
+            this._assertCurrentSession(generation);
           } catch (employeeError) {
+            this._assertCurrentSession(generation);
             this._employees = [];
             employeeWarning = "Inventory access is available, but the employee mapping could not be read: " + employeeError.message;
           }
@@ -370,45 +501,47 @@ sap.ui.define([
         } else {
           await this._loadAssets(true);
         }
+        this._assertCurrentSession(generation);
         this._feedback(employeeWarning || "Connected. Your view is filtered by the role reported by CAP.", employeeWarning ? "Warning" : "Success");
       } catch (error) {
-        this._authenticated = false;
-        this._authorization = "";
-        this._csrfToken = "";
-        this._csrfChecked = false;
-        this._set("connected", false);
-        this._set("loginVisible", true);
-        this._set("loginError", error.message || "Unable to connect to CAP.");
-        this._set("loginErrorVisible", true);
+        if (!this._isCurrentSession(generation) || error.staleSession) {
+          return;
+        }
+        this._clearSessionData();
+        var canChooseProfile = profileChange && this._page().getProperty("/demoProfilesAvailable");
+        this._set("connected", !!canChooseProfile);
+        this._set("loginVisible", !canChooseProfile);
+        if (canChooseProfile) {
+          this._set("userId", this._page().getProperty("/demoOperatorUserId"));
+          this._feedback((error.message || "Unable to load this demo profile.") + " Choose another demo profile or SAP identity to retry.", "Error");
+        } else {
+          this._authorization = "";
+          this._set("demoProfilesAvailable", false);
+          this._set("loginError", error.message || "Unable to connect to CAP.");
+          this._set("loginErrorVisible", true);
+        }
         if (error.status !== 401 && error.status !== 403) {
           Log.error(error.message, error.stack, "it.asset.lifecycle.controller.App");
         }
       } finally {
-        this._setBusy(false);
+        if (this._isCurrentSession(generation)) {
+          this._setBusy(false);
+        }
       }
     },
 
     onSignOut: function () {
+      var authenticationMode = this._page().getProperty("/authenticationMode");
       this._authorization = "";
-      this._csrfToken = "";
-      this._csrfChecked = false;
-      this._authenticated = false;
-      this._selectedAssetId = "";
-      this._assetRows = [];
-      this._employees = [];
-      this._set("connected", false);
-      this._set("loginVisible", true);
-      this._set("items", []);
-      this._set("history", []);
-      this._set("historyLoaded", false);
-      this._set("historyLoading", false);
-      this._set("selected", null);
-      this._set("hasSelection", false);
-      this._set("feedbackVisible", false);
+      this._beginSession("sap", false);
+      this._setBusy(false);
       this.getView().getModel("login").setProperty("/password", "");
       this.getView().getModel("login").setProperty("/username", "");
-      this._applyMobilePanels(false);
-      this.byId("loginUsername").focus();
+      if (authenticationMode === "xsuaa") {
+        window.location.assign("/logout");
+      } else {
+        this.byId("loginUsername").focus();
+      }
     },
 
     onCloseFeedback: function () {
@@ -417,9 +550,10 @@ sap.ui.define([
 
     onSectionChange: async function (event) {
       var key = event.getParameter("key");
-      if (!key || !this._authenticated) {
+      if (!key || !this._authenticated || !this._page().getProperty("/hasBusinessRole")) {
         return;
       }
+      var generation = this._sessionGeneration;
       this._selectedAssetId = "";
       this._set("activeSection", key);
       this._set("selected", null);
@@ -448,7 +582,7 @@ sap.ui.define([
       } catch (error) {
         this._reportFailure(error, "The view could not be loaded.");
       } finally {
-        this._setBusy(false);
+        this._setBusy(false, "", generation);
       }
     },
 
@@ -490,9 +624,10 @@ sap.ui.define([
     },
 
     onRefresh: async function () {
-      if (!this._authenticated) {
+      if (!this._authenticated || !this._page().getProperty("/hasBusinessRole")) {
         return;
       }
+      var generation = this._sessionGeneration;
       this._setBusy(true, "Refreshing from CAP…");
       try {
         if (this._page().getProperty("/activeSection") === "compliance") {
@@ -500,29 +635,32 @@ sap.ui.define([
         } else {
           await this._loadAssets(true);
         }
+        this._assertCurrentSession(generation);
         this._feedback("View refreshed from the CAP service.", "Success");
       } catch (error) {
         this._reportFailure(error, "Refresh failed.");
       } finally {
-        this._setBusy(false);
+        this._setBusy(false, "", generation);
       }
     },
 
     _loadAssetsSafe: async function () {
-      if (!this._authenticated || this._page().getProperty("/activeSection") === "compliance") {
+      if (!this._authenticated || !this._page().getProperty("/hasBusinessRole") || this._page().getProperty("/activeSection") === "compliance") {
         return;
       }
+      var generation = this._sessionGeneration;
       this._setBusy(true, "Loading assets from CAP…");
       try {
         await this._loadAssets(true);
       } catch (error) {
         this._reportFailure(error, "Assets could not be loaded.");
       } finally {
-        this._setBusy(false);
+        this._setBusy(false, "", generation);
       }
     },
 
     _loadAssets: async function (preserveSelection) {
+      var generation = this._sessionGeneration;
       var page = this._page();
       var activeSection = page.getProperty("/activeSection");
       var collection = activeSection === "myAssets" ? "MyAssets" : "Assets";
@@ -559,6 +697,7 @@ sap.ui.define([
 
       var previousId = preserveSelection ? this._selectedAssetId : "";
       var payload = await this._request(this._query(collection, queryValues));
+      this._assertCurrentSession(generation);
       var rows = odataCollection(payload);
       this._assetRows = rows;
       page.setProperty("/items", rows);
@@ -583,11 +722,13 @@ sap.ui.define([
     },
 
     _loadEmployees: async function () {
+      var generation = this._sessionGeneration;
       var payload = await this._request(this._query("Employees", {
         "$top": 500,
         "$skip": 0,
         "$orderby": "displayName asc"
       }));
+      this._assertCurrentSession(generation);
       this._employees = odataCollection(payload).filter(function (person) {
         return person.active !== false && person.enabled !== false;
       }).map(function (person) {
@@ -596,6 +737,7 @@ sap.ui.define([
           displayName: firstDefined(person.displayName, person.employeeName, person.name, person.userId)
         });
       }).filter(function (person) { return !!person.userId; });
+      this._set("employees", this._employees);
     },
 
     onSelectAsset: async function (event) {
@@ -606,9 +748,10 @@ sap.ui.define([
     },
 
     _selectAsset: async function (asset, moveToDetail) {
-      if (!asset || !asset.assetID) {
+      if (!this._authenticated || !asset || !asset.assetID) {
         return;
       }
+      var generation = this._sessionGeneration;
       this._selectedAssetId = asset.assetID;
       this._set("selected", asset);
       this._set("hasSelection", true);
@@ -636,6 +779,7 @@ sap.ui.define([
             "$top": 100,
             "$skip": 0
           }));
+          this._assertCurrentSession(generation);
           if (this._selectedAssetId === assetId) {
             this._set("history", odataCollection(payload));
             this._set("historyLoaded", true);
@@ -643,6 +787,9 @@ sap.ui.define([
             this._updateActionVisibility(asset);
           }
         } catch (error) {
+          if (!this._isCurrentSession(generation) || error.staleSession || this._selectedAssetId !== asset.assetID) {
+            return;
+          }
           this._set("history", []);
           this._set("historyLoaded", false);
           this._set("historyLoading", false);
@@ -721,7 +868,9 @@ sap.ui.define([
     },
 
     _loadCompliance: async function () {
+      var generation = this._sessionGeneration;
       var raw = await this._request("complianceAlerts()", { method: "GET" });
+      this._assertCurrentSession(generation);
       var summary = unwrap(raw);
       if (summary.businessToday) {
         this._set("businessToday", summary.businessToday);
@@ -1017,6 +1166,7 @@ sap.ui.define([
     },
 
     _formDialog: function (title, fieldSet, submitText, onSubmit, options) {
+      var generation = this._sessionGeneration;
       var settings = options || {};
       var contentItems = [];
       fieldSet.content.forEach(function (item) {
@@ -1038,17 +1188,23 @@ sap.ui.define([
           text: submitText,
           type: "Emphasized",
           press: async function () {
+            if (!this._isCurrentSession(generation)) {
+              return;
+            }
             var button = dialog.getBeginButton();
             button.setEnabled(false);
             try {
               var accepted = await onSubmit.call(this, dialog);
+              this._assertCurrentSession(generation);
               if (accepted !== false) {
                 dialog.close();
               }
             } catch (error) {
               this._reportFailure(error, "The request was rejected.");
             } finally {
-              button.setEnabled(true);
+              if (this._isCurrentSession(generation) && !button.isDestroyed()) {
+                button.setEnabled(true);
+              }
             }
           }.bind(this)
         }),
@@ -1058,7 +1214,11 @@ sap.ui.define([
         })
       });
       dialog.addStyleClass("assetDialog");
-      dialog.attachAfterClose(function () { dialog.destroy(); });
+      this._sessionDialogs.push(dialog);
+      dialog.attachAfterClose(function () {
+        this._sessionDialogs = this._sessionDialogs.filter(function (openDialog) { return openDialog !== dialog; });
+        dialog.destroy();
+      }.bind(this));
       return dialog;
     },
 
@@ -1123,6 +1283,7 @@ sap.ui.define([
     },
 
     onReturn: function () {
+      var generation = this._sessionGeneration;
       var asset = this._page().getProperty("/selected");
       if (!asset) { return; }
       MessageBox.confirm("Return " + asset.assetName + " and close its active allocation record?", {
@@ -1130,7 +1291,7 @@ sap.ui.define([
         actions: [MessageBox.Action.OK, MessageBox.Action.CANCEL],
         emphasizedAction: MessageBox.Action.OK,
         onClose: async function (action) {
-          if (action !== MessageBox.Action.OK) { return; }
+          if (action !== MessageBox.Action.OK || !this._isCurrentSession(generation)) { return; }
           await this._runLifecycleAction("returnAsset", { assetID: asset.assetID }, "Asset returned. CAP closed the active history record and restored Available status.");
         }.bind(this)
       });
@@ -1218,6 +1379,7 @@ sap.ui.define([
     },
 
     onDeleteAsset: function () {
+      var generation = this._sessionGeneration;
       var asset = this._page().getProperty("/selected");
       if (!asset) { return; }
       MessageBox.confirm("Permanently delete this asset only if CAP confirms it has no allocation history? This cannot be undone.", {
@@ -1225,9 +1387,10 @@ sap.ui.define([
         actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
         emphasizedAction: MessageBox.Action.DELETE,
         onClose: async function (action) {
-          if (action !== MessageBox.Action.DELETE) { return; }
+          if (action !== MessageBox.Action.DELETE || !this._isCurrentSession(generation)) { return; }
           try {
             await this._request(this._entityPath("Assets", asset.assetID), { method: "DELETE" });
+            this._assertCurrentSession(generation);
             this._selectedAssetId = "";
             this._set("selected", null);
             this._set("hasSelection", false);
@@ -1242,25 +1405,31 @@ sap.ui.define([
     },
 
     _runLifecycleAction: async function (operation, payload, successText) {
+      var generation = this._sessionGeneration;
       this._setBusy(true, "Updating asset lifecycle…");
       try {
         await this._request(operation, { method: "POST", body: JSON.stringify(payload) });
+        this._assertCurrentSession(generation);
+        this._feedback(successText, "Success");
+        await this._refreshAfterMutation();
+        this._assertCurrentSession(generation);
+        return true;
       } catch (error) {
         this._reportFailure(error, "CAP rejected the lifecycle change.");
         return false;
       } finally {
-        this._setBusy(false);
+        this._setBusy(false, "", generation);
       }
-      this._feedback(successText, "Success");
-      await this._refreshAfterMutation();
-      return true;
     },
 
     _reloadSelectionAndList: async function () {
+      var generation = this._sessionGeneration;
       var id = this._selectedAssetId;
       try {
         await this._loadAssets(true);
+        this._assertCurrentSession(generation);
       } catch (error) {
+        this._assertCurrentSession(generation);
         this._reportFailure(error, "The change succeeded, but the inventory refresh failed.");
         return false;
       }
@@ -1268,6 +1437,7 @@ sap.ui.define([
         var collection = this._page().getProperty("/activeSection") === "myAssets" ? "MyAssets" : "Assets";
         try {
           var payload = await this._request(this._entityPath(collection, id));
+          this._assertCurrentSession(generation);
           var updated = unwrap(payload);
           if (updated && updated.assetID) {
             this._set("selected", updated);
@@ -1278,6 +1448,7 @@ sap.ui.define([
             this._updateActionVisibility(updated);
           }
         } catch (error) {
+          this._assertCurrentSession(generation);
           Log.warning("Selected asset readback was unavailable after the successful action: " + error.message, "", "it.asset.lifecycle.controller.App");
         }
       }
@@ -1285,6 +1456,7 @@ sap.ui.define([
     },
 
     _refreshAfterMutation: async function (preserveSelection) {
+      var generation = this._sessionGeneration;
       try {
         var section = this._page().getProperty("/activeSection");
         if (section === "compliance") {
@@ -1294,11 +1466,14 @@ sap.ui.define([
         } else {
           await this._reloadSelectionAndList();
         }
+        this._assertCurrentSession(generation);
         if (section !== "compliance" && this._page().getProperty("/canCompliance")) {
           await this._loadCompliance();
         }
+        this._assertCurrentSession(generation);
         return true;
       } catch (error) {
+        this._assertCurrentSession(generation);
         this._reportFailure(error, "The change succeeded, but its readback could not be refreshed.");
         return false;
       }

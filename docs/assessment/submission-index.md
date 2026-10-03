@@ -38,6 +38,8 @@ The integrated model preserves the literal `AllocationHistory.assetID` associati
 
 ## Verification and demonstration aids
 
+The [cloud demo data guide](../cloud-demo-data.md) explains the SQLite-to-HANA snapshot transfer and XSUAA-protected trial profile selector. Actual live results are indexed separately.
+
 | Aid | Purpose |
 |---|---|
 | [Requirement matrix](requirement-evidence-matrix.csv) | Gate-by-gate PASS, FAIL, BLOCKED, or NOT RUN with supporting evidence. |
