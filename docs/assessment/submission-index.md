@@ -2,7 +2,7 @@
 
 Updated **2026-10-03 (Asia/Kolkata)** for **Technology Industry — IT Asset Lifecycle Management**. This index identifies the application, required deliverables, and evidence records in this repository. It is a navigation artifact; it does not assert that all acceptance gates have passed.
 
-The current acceptance status is recorded in the [requirement-to-evidence matrix](requirement-evidence-matrix.csv). As of 2026-10-03 it records 56 PASS, 0 FAIL, 3 BLOCKED, and 2 NOT RUN gates; see each row for its evidence and limitations. The authorized trial Cloud Foundry deployment, live HANA mapping/bindings, and one authenticated Compliance Manager runtime smoke pass. Build Code generation remains blocked. All-three-role cloud authorization/HANA lifecycle verification is blocked pending a verified ITAdmin cloud session. Local logs, BAS runtime, Build Code generation, and cloud deployment are separate claims.
+The current acceptance status is recorded in the [requirement-to-evidence matrix](requirement-evidence-matrix.csv). As of 2026-10-03 it records 58 PASS, 0 FAIL, 4 BLOCKED, and 2 NOT RUN gates; see each row for its evidence and limitations. The authorized trial Cloud Foundry deployment, live HANA mapping/bindings, exact BAS SQLite snapshot import with successful identical repeat, and imported-data Compliance view pass. Build Code generation remains blocked. Cloud Admin/Employee profile verification is blocked while the restricted demo-operator assignment awaits action-time confirmation; HANA lifecycle checks remain unrun. Local logs, BAS runtime, Build Code generation, and cloud deployment are separate claims.
 
 ## Required deliverables
 
@@ -38,7 +38,7 @@ The integrated model preserves the literal `AllocationHistory.assetID` associati
 
 ## Verification and demonstration aids
 
-The [cloud demo data guide](../cloud-demo-data.md) explains the SQLite-to-HANA snapshot transfer and XSUAA-protected trial profile selector. Actual live results are indexed separately.
+The [cloud demo data guide](../cloud-demo-data.md) explains the SQLite-to-HANA snapshot transfer and XSUAA-protected trial profile selector. The actual import and repeat task results are in the [HANA transfer record](../evidence/cloud-hana-import-2026-10-03.md); app-role verification remains pending.
 
 | Aid | Purpose |
 |---|---|
@@ -52,9 +52,9 @@ The [cloud demo data guide](../cloud-demo-data.md) explains the SQLite-to-HANA s
 1. Install and launch with the README. Record the source revision and business date used for the run.
 2. Compile and execute meaningful backend/integration checks. Capture current outputs rather than replacing them with reconstructed summaries.
 3. Exercise the demonstration script in the running SAPUI5 app and record the actual result for each workflow and role.
-4. The lead completed the BAS build, database deployment, startup, and role-view checks; see the [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md). The 2026-10-03 Cloud Foundry deployment, live HANA mapping/bindings, and authenticated Compliance Manager smoke are recorded in the [cloud deployment result](../evidence/cloud-deploy-success-2026-10-03.md). Build Code generation is blocked; all-three-role cloud authorization/HANA lifecycle verification requires a verified ITAdmin cloud session.
-5. Independent backend findings were repaired and rerun; remaining scale, runtime pinning, full Admin UI, manual accessibility, Build Code generation, and cloud verification limitations are explicit in the [consistency review](document-consistency-review.md) and matrix.
-6. Compile, root integration tests, production build, and UI packaging were rerun after the final source repair. Evidence is dated and linked; the checked-in BAS image captures are earlier than the latest role smoke and the current screenshots were not persisted locally.
+4. The lead completed the BAS build, database deployment, startup, and role-view checks; see the [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md). The 2026-10-03 Cloud Foundry deployment, live HANA mapping/bindings, successful BAS snapshot import and repeat, and authenticated Compliance Manager view are recorded in the [cloud deployment result](../evidence/cloud-deploy-success-2026-10-03.md) and [HANA transfer record](../evidence/cloud-hana-import-2026-10-03.md). Build Code generation remains blocked. Demo-profile access is awaiting assignment confirmation; HANA lifecycle/concurrency/restart verification is unrun.
+5. Independent backend findings were repaired and rerun; remaining scale, runtime pinning, full Admin UI, accessibility, Build Code generation, demo-role assignment, and HANA lifecycle verification limitations are explicit in the [consistency review](document-consistency-review.md) and matrix.
+6. Compile, root integration tests, production build, and UI packaging were rerun after the final source repair. Evidence is dated and linked. The 2026-10-03 BAS SQLite export and Cloud Foundry import/Compliance screenshots are checked in with the HANA transfer record; the detailed Admin/Employee BAS workflow images remain the earlier 2026-10-01 captures.
 7. Do not claim readiness while required gates remain failed, blocked, or unrun. The assessment portal and permanent submission remain under the user's control.
 
 The assessment portal and permanent submission remain under the user's control.

@@ -62,3 +62,9 @@ This matches the instance ID displayed under loyalty-reward-db > Connections and
 The live mapping and bindings verify the selected database connection configuration. No cloud asset write, allocation race, or persistence-after-restart test was performed during this read-only inspection.
 
 The browser accessibility output included the signed-in identity, so it was not copied into this record. No screenshot of the authenticated cloud page or raw BAS terminal capture was saved. This sanitized note records the observed command completion, routes, HTTP result, role, date, and empty dashboard without storing account email, credentials, or tokens.
+
+## Follow-up: demo data import
+
+After that initial empty-dashboard smoke, the actual BAS SQLite data was exported and transferred to this application's dedicated HDI container with the guard and readback checks described in the [Cloud HANA import record](cloud-hana-import-2026-10-03.md). The first task and an identical repeat task both reached `SUCCEEDED`; the deployed Compliance page now shows the corresponding BAS alert data. See the linked transfer record for the 16/3/3 counts, source snapshot digest, timestamps, and screenshots. This later import does not change the earlier observation that the first app smoke was empty.
+
+The restricted `AssetDemoOperator` collection is selected in a prepared assignment form for the current SAP identity. The final Assign Role Collection action has not been submitted. Cloud Admin and Employee alias views, HANA lifecycle writes, allocation concurrency, and persistence after restart remain unverified.
