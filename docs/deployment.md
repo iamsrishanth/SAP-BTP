@@ -1,6 +1,6 @@
 # SAP BTP Cloud Foundry Deployment Guide
 
-Updated **2026-10-01 (Asia/Kolkata)** against the current MTA, trial extension, service contract, and lead environment observations. **This application's Cloud Foundry deployment and cloud smoke tests are not yet recorded as successful.** BAS execution, cloud access, HANA availability, and an actual deployed application are distinct evidence.
+Updated **2026-10-03 (Asia/Kolkata)** against the current MTA, trial extension, service contract, and lead environment observations. The repaired MTA has now deployed to the authorized trial space, and an authenticated Compliance Manager UI smoke check succeeded. Cross-role cloud access, HANA lifecycle writes, and HANA persistence checks remain unverified; see the [deployment result](evidence/cloud-deploy-success-2026-10-03.md).
 
 ## Target inspected by the lead
 
@@ -11,8 +11,8 @@ Updated **2026-10-01 (Asia/Kolkata)** against the current MTA, trial extension, 
 | Authentication | SSO refreshed; target selected by the lead. Do not store tokens or passcodes in the repository. |
 | HANA availability | hana / hdi-shared plan available; existing HANA Cloud instance loyalty-reward-db reported Running. |
 | Selected database ID | 0dda540b-396a-487b-b665-805ed690ec14 |
-| Task service instances | Task-specific XSUAA and HDI service instances were present and bound to the task apps. The task service, router, and deployer applications were stopped at the last inspection. |
-| Task route and cloud roles | A successful app deployment/runtime, usable route, role assignment, or cloud lifecycle result is not recorded. |
+| Task service instances | Live HDI service sap-btp-it-asset-lifecycle-db (hana/hdi-shared, dev) is Usable and bound to the CAP server and database deployer. Its Current Configuration database_id matches 0dda540b-396a-487b-b665-805ed690ec14. The 2026-10-03 MTA deployment completed; the router and CAP service started. |
+| Task route and cloud roles | The router returned HTTP 200 and the app connected through the existing SAP BTP session as ComplianceManager. The generated ITAdmin collection has no users, user groups, or attribute mappings. No role assignment was changed; Admin/Employee cloud tests remain unrun. |
 
 The [trial extension](../mta.trial.mtaext) selects this database by database_id. It provisions the task's separate HDI container and does not reuse another application's schema. Inspect the target before deployment; these observed account values should not be reused in another account.
 
@@ -102,9 +102,9 @@ mbt build -t gen --mtar mta.tar
 cf deploy gen/mta.tar -e mta.trial.mtaext -f
 ~~~
 
-The extension must match MTA ID sap-btp-it-asset-lifecycle and the selected running database. The -e option applies the deployment extension; the -f option skips a conflicting-process confirmation, so check the target and ongoing MTA operations before use. Deployment was authorized for this task's target and attempted after the packaging repair. It timed out before registering an operation; see the [deployment attempt record](evidence/cloud-deploy-attempt-2026-10-01.md). Do not infer success from the archive build.
+The extension must match MTA ID sap-btp-it-asset-lifecycle and the selected running database. The -e option applies the deployment extension; the -f option skips a conflicting-process confirmation, so check the target and ongoing MTA operations before use. Two 2026-10-01 post-repair clients timed out before registering an operation; that historical result remains in the [earlier attempt record](evidence/cloud-deploy-attempt-2026-10-01.md). A single bounded deployment on 2026-10-03 completed successfully; see the [deployment result](evidence/cloud-deploy-success-2026-10-03.md). Do not infer success from an archive build alone.
 
-After a future deployment completes:
+For future deployments and runtime verification:
 
 ~~~powershell
 cf apps
@@ -120,6 +120,8 @@ Verify CAP and the router are running and the HDI deployer completed successfull
 ## Role setup and trusted Employee provisioning
 
 BTP application role assignment and the persisted Employee mapping are separate controls.
+
+The live ITAdmin collection inspected on 2026-10-03 is **ITAdmin (sap-btp-it-asset-lifecycle 6fd93d19trial-dev)**. Its Users list says **No users**; it also has no user groups or attribute mappings. An authorized identity with the app's ITAdmin role must sign in before the cloud Admin demonstration can proceed. A BTP role administrator can assign this collection to an approved identity. Other role collections were not exhaustively inspected for an equivalent grant.
 
 1. After XSUAA deployment, inspect the actual role collections declared from ITAdmin, ComplianceManager, and Employee templates. The MTA names include the organization and space. A BTP role administrator assigns the minimum required collection to each authorized user using Security > Role Collections. Confirm the correct identity-provider origin.
 2. Authenticate through the router and call GET /odata/v4/asset-management/sessionInfo(). Confirm userId and expected role labels from the actual target. Do not infer a CAP subject from a display name, email, screenshot watermark, or local mock ID.
@@ -137,6 +139,8 @@ BTP application role assignment and the persisted Employee mapping are separate 
 
 This is an executable supported workflow, not a claim that any production mapping or role was provisioned. The action does not create an identity-provider user, grant credentials, or assign BTP roles. Requests through the approuter must satisfy authentication and CSRF; the SAPUI5 controller obtains the token/session context before writes. Record actual response/status/fields, not secrets or token values.
 
+For the cloud Admin sign-in, open the [deployed application](https://6fd93d19trial-dev-sap-btp-it-asset-lifecycle.cfapps.us10-001.hana.ondemand.com/) in a fresh SAP authentication session for the assigned identity. Complete SAP sign-in, leave the application mock username/password fields empty, and select **Connect**. Confirm that the application reports **ITAdmin** before making changes. If a role was just assigned, obtain a fresh authentication session so the new role is present in the token. Local it.admin/demo-admin credentials apply only to the development preview.
+
 ## BAS and Build Code evidence
 
 On 2026-10-01 the lead created ITAssetLifecycle from this Git repository in SAP Build and synchronized source revision f7d5c44 in BAS workspace ws-ue4j9. The repaired source compiled and built, UI assets copied, MTA archive built, SQLite migration/schema deployment succeeded, and CAP started on port 4004. The live preview showed Admin inventory/search, Employee own asset/detail, and Compliance alerts. The complete set of current observations and screenshot limits is recorded in [BAS verification notes](evidence/bas-environment-verification-2026-10-01.md). The checked-in BAS build/runtime/Admin images are authentic earlier captures; they do not claim the latest preview screenshot was saved.
@@ -147,7 +151,7 @@ The exact actual Build Code/Joule prompt and its no-response result are in the [
 
 ## Cloud smoke checks and troubleshooting
 
-After actual deployment, verify role-specific direct API access, absence of unauthenticated inventory, Employee key/count/filter isolation, Compliance Manager alert-only data, controlled Admin provisioning/lifecycle actions, HANA allocation race behavior, history consistency, renewal/date/idle boundaries, retirement, and persistence after refresh/restart. Use actual production principals and evidence; SQLite test success does not establish HANA/XSUAA behavior.
+After deployment, verify role-specific direct API access, absence of unauthenticated inventory, Employee key/count/filter isolation, Compliance Manager alert-only data, controlled Admin provisioning/lifecycle actions, HANA allocation race behavior, history consistency, renewal/date/idle boundaries, retirement, and persistence after refresh/restart. The 2026-10-03 smoke check exercised the router and the existing ComplianceManager session only. Use actual authorized principals and evidence; SQLite test success does not establish HANA/XSUAA lifecycle behavior.
 
 | Symptom | Check / next action |
 |---|---|
@@ -161,7 +165,7 @@ After actual deployment, verify role-specific direct API access, absence of unau
 | Old SQLite history column error | Stop local server and run db:deploy; inspect migration backup/result. Do not apply the SQLite helper to HANA. |
 | Demo rows appear in production | Stop/inspect the active production profile and MTA ASSET_SEED_DEMO=false; investigate without overwriting cloud data. |
 
-The repaired MTA archive build succeeded in BAS. Two Cloud Foundry deployment clients then timed out at the initial archive-deploy step; the bounded attempt ended after 300 seconds before any new operation registered. The task apps were stopped and there is no deployed runtime evidence. Role assignment, production Employee onboarding, and cloud HANA smoke checks remain unrun. The current gate is **FAIL** for the deployment attempt; see the [attempt record](evidence/cloud-deploy-attempt-2026-10-01.md), [matrix](assessment/requirement-evidence-matrix.csv), and [evidence index](assessment/execution-evidence.md). Retry after the MultiApps deployment endpoint responds normally.
+The two 2026-10-01 deployment timeouts are preserved as historical evidence. On 2026-10-03 one bounded deployment completed successfully, both CF apps reported started routes, a router GET returned HTTP 200, and the SAPUI5 application connected as ComplianceManager and rendered its empty compliance dashboard. The live HDI parameters and bound-app list confirm that the asset app uses its own HDI container in loyalty-reward-db. The deployment gate passes. All-three-role cloud and HANA lifecycle verification is blocked by the missing verified ITAdmin cloud session; Employee/Admin authorization, HANA lifecycle writes, concurrency, and persistence checks remain unrun. See the [deployment result](evidence/cloud-deploy-success-2026-10-03.md), [matrix](assessment/requirement-evidence-matrix.csv), and [evidence index](assessment/execution-evidence.md).
 
 ## Official references
 

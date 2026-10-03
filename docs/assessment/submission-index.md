@@ -1,8 +1,8 @@
 # Assessment Submission Index
 
-Prepared on **2026-10-01 (Asia/Kolkata)** for **Technology Industry — IT Asset Lifecycle Management**. This index identifies the application, required deliverables, and evidence records in this repository. It is a navigation artifact; it does not assert that all acceptance gates have passed.
+Updated **2026-10-03 (Asia/Kolkata)** for **Technology Industry — IT Asset Lifecycle Management**. This index identifies the application, required deliverables, and evidence records in this repository. It is a navigation artifact; it does not assert that all acceptance gates have passed.
 
-The final local acceptance status is recorded in the [requirement-to-evidence matrix](requirement-evidence-matrix.csv). It records 55 PASS, 1 FAIL, 2 BLOCKED, and 2 NOT RUN gates as of 2026-10-01; see each row for its evidence and limitations. The lead used BAS with the repaired source and observed its live UI. Actual Build Code code generation remains blocked and Cloud Foundry deployment failed before an operation registered. Local logs, BAS runtime, Build Code generation, and cloud deployment are separate claims.
+The current acceptance status is recorded in the [requirement-to-evidence matrix](requirement-evidence-matrix.csv). As of 2026-10-03 it records 56 PASS, 0 FAIL, 3 BLOCKED, and 2 NOT RUN gates; see each row for its evidence and limitations. The authorized trial Cloud Foundry deployment, live HANA mapping/bindings, and one authenticated Compliance Manager runtime smoke pass. Build Code generation remains blocked. All-three-role cloud authorization/HANA lifecycle verification is blocked pending a verified ITAdmin cloud session. Local logs, BAS runtime, Build Code generation, and cloud deployment are separate claims.
 
 ## Required deliverables
 
@@ -50,7 +50,7 @@ The integrated model preserves the literal `AllocationHistory.assetID` associati
 1. Install and launch with the README. Record the source revision and business date used for the run.
 2. Compile and execute meaningful backend/integration checks. Capture current outputs rather than replacing them with reconstructed summaries.
 3. Exercise the demonstration script in the running SAPUI5 app and record the actual result for each workflow and role.
-4. The lead completed current BAS build, database deployment, startup, and role-view checks; see the [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md). The actual Build Code and Cloud Foundry outcomes remain blocked/failed and are recorded in their dedicated logs.
+4. The lead completed the BAS build, database deployment, startup, and role-view checks; see the [BAS verification notes](../evidence/bas-environment-verification-2026-10-01.md). The 2026-10-03 Cloud Foundry deployment, live HANA mapping/bindings, and authenticated Compliance Manager smoke are recorded in the [cloud deployment result](../evidence/cloud-deploy-success-2026-10-03.md). Build Code generation is blocked; all-three-role cloud authorization/HANA lifecycle verification requires a verified ITAdmin cloud session.
 5. Independent backend findings were repaired and rerun; remaining scale, runtime pinning, full Admin UI, manual accessibility, Build Code generation, and cloud verification limitations are explicit in the [consistency review](document-consistency-review.md) and matrix.
 6. Compile, root integration tests, production build, and UI packaging were rerun after the final source repair. Evidence is dated and linked; the checked-in BAS image captures are earlier than the latest role smoke and the current screenshots were not persisted locally.
 7. Do not claim readiness while required gates remain failed, blocked, or unrun. The assessment portal and permanent submission remain under the user's control.
